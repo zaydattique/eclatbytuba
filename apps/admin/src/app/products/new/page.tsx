@@ -4,17 +4,19 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@eclat/ui";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export default function NewProductPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [images, setImages] = useState<string[]>([]);
   const [form, setForm] = useState({
     name: "",
     slug: "",
     price: "",
     compareAtPrice: "",
     inventory: "0",
-    category: "Dresses",
     description: "",
     isActive: true,
     isFeatured: false,
@@ -23,10 +25,34 @@ export default function NewProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
-    console.log("Create product:", form);
-    setSaving(false);
-    router.push("/products");
+    setError("");
+
+    try {
+      const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const res = await fetch(`${base}/api/products`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          slug: form.slug,
+          price: form.price,
+          compareAtPrice: form.compareAtPrice || null,
+          inventory: form.inventory,
+          description: form.description,
+          isActive: form.isActive,
+          isFeatured: form.isFeatured,
+          images,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create");
+      router.push("/products");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -50,7 +76,10 @@ export default function NewProductPage() {
                 setForm({
                   ...form,
                   name: e.target.value,
-                  slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+                  slug: e.target.value
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")
+                    .replace(/[^a-z0-9-]/g, ""),
                 })
               }
             />
@@ -85,28 +114,14 @@ export default function NewProductPage() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Inventory</label>
-              <Input
-                className="mt-1"
-                type="number"
-                value={form.inventory}
-                onChange={(e) => setForm({ ...form, inventory: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Category</label>
-              <select
-                className="mt-1 flex h-10 w-full rounded-md border border-[#e8e4dc] bg-white px-3 text-sm"
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-              >
-                {["Dresses", "Outerwear", "Blazers", "Bottoms", "Accessories"].map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Inventory</label>
+            <Input
+              className="mt-1"
+              type="number"
+              value={form.inventory}
+              onChange={(e) => setForm({ ...form, inventory: e.target.value })}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Description</label>
@@ -116,6 +131,10 @@ export default function NewProductPage() {
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Images</label>
+            <ImageUpload value={images} onChange={setImages} />
           </div>
           <div className="flex gap-6">
             <label className="flex items-center gap-2 text-sm">
@@ -136,6 +155,8 @@ export default function NewProductPage() {
             </label>
           </div>
         </div>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex gap-3">
           <Button type="submit" disabled={saving}>
