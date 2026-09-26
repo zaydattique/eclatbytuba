@@ -52,9 +52,26 @@ pnpm dev
 |-------|--------|-------------|
 | **Phase 1** | ✅ Done | Monorepo skeleton, design tokens, shared packages |
 | **Phase 2** | ✅ Done | Database schema, basic storefront + admin shells |
-| **Phase 3** | 🔜 Next | Product catalog, cart, checkout, admin CRUD |
-| **Phase 4** | — | Payments, orders, shipping, emails |
+| **Phase 3** | ✅ Done | Product catalog, cart, checkout, admin CRUD |
+| **Phase 4** | 🔜 Next | Real DB integration, payments, order management |
 | **Phase 5** | — | Polish, SEO, performance, deploy |
+
+## Phase 3 Features
+
+### Storefront (`apps/web`)
+- Homepage with featured products
+- Product listing with category filters
+- Product detail pages
+- Cart (localStorage + React context)
+- Checkout flow (COD-ready)
+- Header + Footer
+
+### Admin (`apps/admin`)
+- Dashboard with KPIs + recent orders
+- Products list + Add Product form
+- Categories list
+- Orders list with status badges
+- Persistent sidebar navigation
 
 ## Brand
 
