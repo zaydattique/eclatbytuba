@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@eclat/auth": "workspace:*",
     "@eclat/config": "workspace:*",
     "@eclat/db": "workspace:*",
     "@eclat/ui": "workspace:*",

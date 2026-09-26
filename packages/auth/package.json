@@ -1,0 +1,16 @@
+{
+  "name": "@eclat/auth",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "echo 'lint auth'"
+  },
+  "dependencies": {
+    "jose": "^5.9.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}
