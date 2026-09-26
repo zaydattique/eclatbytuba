@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       isActive: body.isActive ?? true,
       isFeatured: body.isFeatured ?? false,
       tags: body.tags,
+      images: body.images,
     });
     return NextResponse.json({ product }, { status: 201 });
   } catch (e: any) {
