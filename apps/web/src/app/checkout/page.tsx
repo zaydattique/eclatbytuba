@@ -8,6 +8,10 @@ import { useCart } from "@/context/CartContext";
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
   const [placed, setPlaced] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [form, setForm] = useState({
     email: "",
     fullName: "",
@@ -34,7 +38,12 @@ export default function CheckoutPage() {
       <main className="mx-auto max-w-3xl px-6 py-20 text-center">
         <h1 className="font-serif text-3xl">Thank you</h1>
         <p className="mt-4 text-gray-600">
-          Your order has been placed. We’ll contact you shortly to confirm.
+          Your order <strong>{orderNumber}</strong> has been placed.
+        </p>
+        <p className="mt-2 text-sm text-gray-500">
+          {paymentMethod === "cod"
+            ? "We’ll contact you shortly to confirm. Pay on delivery."
+            : "We’ll send payment instructions shortly."}
         </p>
         <Link href="/products" className="mt-8 inline-block">
           <Button>Continue Shopping</Button>
@@ -43,11 +52,47 @@ export default function CheckoutPage() {
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Order:", { form, items, subtotal });
-    clearCart();
-    setPlaced(true);
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email,
+          phone: form.phone,
+          paymentMethod,
+          shippingAddress: {
+            fullName: form.fullName,
+            line1: form.address,
+            city: form.city,
+            postalCode: form.postalCode,
+            country: "PK",
+          },
+          items: items.map((i) => ({
+            productId: i.productId,
+            name: i.name,
+            price: i.price,
+            quantity: i.quantity,
+            imageUrl: i.imageUrl,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to place order");
+
+      setOrderNumber(data.order.orderNumber);
+      clearCart();
+      setPlaced(true);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -95,6 +140,38 @@ export default function CheckoutPage() {
               onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
             />
           </div>
+
+          <div>
+            <h3 className="mb-3 text-sm font-medium">Payment Method</h3>
+            <div className="space-y-2">
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="cod"
+                  checked={paymentMethod === "cod"}
+                  onChange={() => setPaymentMethod("cod")}
+                />
+                <div>
+                  <p className="text-sm font-medium">Cash on Delivery</p>
+                  <p className="text-xs text-gray-500">Pay when you receive your order</p>
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="bank_transfer"
+                  checked={paymentMethod === "bank_transfer"}
+                  onChange={() => setPaymentMethod("bank_transfer")}
+                />
+                <div>
+                  <p className="text-sm font-medium">Bank Transfer</p>
+                  <p className="text-xs text-gray-500">We’ll send account details after order</p>
+                </div>
+              </label>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -114,16 +191,16 @@ export default function CheckoutPage() {
                 <span>PKR {subtotal.toLocaleString()}</span>
               </div>
               <p className="mt-1 text-xs text-gray-400">
-                Shipping & taxes calculated after confirmation
+                Shipping calculated after confirmation
               </p>
             </div>
           </div>
-          <Button type="submit" size="lg" className="mt-6 w-full">
-            Place Order
+
+          {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+
+          <Button type="submit" size="lg" className="mt-6 w-full" disabled={loading}>
+            {loading ? "Placing Order..." : "Place Order"}
           </Button>
-          <p className="mt-3 text-center text-xs text-gray-400">
-            Cash on delivery available. We’ll confirm your order by phone.
-          </p>
         </div>
       </form>
     </main>

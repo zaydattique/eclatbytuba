@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ProductCard } from "@eclat/ui";
-import { PRODUCTS, CATEGORIES } from "@/lib/products";
+import { getAllProducts, getCategories } from "@/lib/products";
 
 export const metadata = {
   title: "Shop",
@@ -10,11 +10,12 @@ interface Props {
   searchParams: { category?: string };
 }
 
-export default function ProductsPage({ searchParams }: Props) {
+export default async function ProductsPage({ searchParams }: Props) {
   const category = searchParams.category;
-  const products = category
-    ? PRODUCTS.filter((p) => p.categorySlug === category)
-    : PRODUCTS;
+  const [products, categories] = await Promise.all([
+    getAllProducts(category),
+    getCategories(),
+  ]);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
@@ -25,7 +26,6 @@ export default function ProductsPage({ searchParams }: Props) {
         </p>
       </div>
 
-      {/* Category filters */}
       <div className="mb-10 flex flex-wrap gap-3">
         <Link
           href="/products"
@@ -37,7 +37,7 @@ export default function ProductsPage({ searchParams }: Props) {
         >
           All
         </Link>
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat: any) => (
           <Link
             key={cat.slug}
             href={`/products?category=${cat.slug}`}
@@ -52,7 +52,6 @@ export default function ProductsPage({ searchParams }: Props) {
         ))}
       </div>
 
-      {/* Grid */}
       {products.length === 0 ? (
         <p className="py-20 text-center text-gray-500">No products found in this category.</p>
       ) : (

@@ -4,12 +4,11 @@ import { ProductCard } from "@eclat/ui";
 import { siteConfig } from "@eclat/config";
 import { getFeaturedProducts } from "@/lib/products";
 
-export default function HomePage() {
-  const featured = getFeaturedProducts();
+export default async function HomePage() {
+  const featured = await getFeaturedProducts();
 
   return (
     <main>
-      {/* Hero */}
       <section className="relative flex min-h-[80vh] flex-col items-center justify-center px-6 text-center">
         <p className="mb-4 text-sm uppercase tracking-[0.3em] text-brand-secondary">
           New Collection
@@ -32,7 +31,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured */}
       <section className="border-t border-brand-border px-6 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 flex items-end justify-between">
