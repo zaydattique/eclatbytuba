@@ -42,8 +42,10 @@ export default function CheckoutPage() {
         </p>
         <p className="mt-2 text-sm text-gray-500">
           {paymentMethod === "cod"
-            ? "We’ll contact you shortly to confirm. Pay on delivery."
-            : "We’ll send payment instructions shortly."}
+            ? "We'll contact you shortly to confirm. Pay on delivery."
+            : paymentMethod === "stripe"
+              ? "Payment received. We'll process your order shortly."
+              : "We'll send payment instructions shortly."}
         </p>
         <Link href="/products" className="mt-8 inline-block">
           <Button>Continue Shopping</Button>
@@ -85,6 +87,23 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to place order");
 
+      if (paymentMethod === "stripe") {
+        const payRes = await fetch("/api/payments/create-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: subtotal,
+            currency: "pkr",
+            orderId: data.order.id,
+          }),
+        });
+        const payData = await payRes.json();
+        if (!payRes.ok) throw new Error(payData.error || "Payment failed");
+        if (payData.mock) {
+          console.log("Stripe mock payment:", payData.paymentIntentId);
+        }
+      }
+
       setOrderNumber(data.order.orderNumber);
       clearCart();
       setPlaced(true);
@@ -102,72 +121,37 @@ export default function CheckoutPage() {
       <form onSubmit={handleSubmit} className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-2">
         <div className="space-y-6">
           <h2 className="text-lg font-medium">Contact & Shipping</h2>
-          <Input
-            placeholder="Email"
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-          <Input
-            placeholder="Full Name"
-            required
-            value={form.fullName}
-            onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-          />
-          <Input
-            placeholder="Phone"
-            required
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-          <Input
-            placeholder="Address"
-            required
-            value={form.address}
-            onChange={(e) => setForm({ ...form, address: e.target.value })}
-          />
+          <Input placeholder="Email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <Input placeholder="Full Name" required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+          <Input placeholder="Phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <Input placeholder="Address" required value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              placeholder="City"
-              required
-              value={form.city}
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
-            />
-            <Input
-              placeholder="Postal Code"
-              value={form.postalCode}
-              onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-            />
+            <Input placeholder="City" required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+            <Input placeholder="Postal Code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} />
           </div>
 
           <div>
             <h3 className="mb-3 text-sm font-medium">Payment Method</h3>
             <div className="space-y-2">
               <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="cod"
-                  checked={paymentMethod === "cod"}
-                  onChange={() => setPaymentMethod("cod")}
-                />
+                <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} />
                 <div>
                   <p className="text-sm font-medium">Cash on Delivery</p>
                   <p className="text-xs text-gray-500">Pay when you receive your order</p>
                 </div>
               </label>
               <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="bank_transfer"
-                  checked={paymentMethod === "bank_transfer"}
-                  onChange={() => setPaymentMethod("bank_transfer")}
-                />
+                <input type="radio" name="payment" value="bank_transfer" checked={paymentMethod === "bank_transfer"} onChange={() => setPaymentMethod("bank_transfer")} />
                 <div>
                   <p className="text-sm font-medium">Bank Transfer</p>
-                  <p className="text-xs text-gray-500">We’ll send account details after order</p>
+                  <p className="text-xs text-gray-500">We'll send account details after order</p>
+                </div>
+              </label>
+              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
+                <input type="radio" name="payment" value="stripe" checked={paymentMethod === "stripe"} onChange={() => setPaymentMethod("stripe")} />
+                <div>
+                  <p className="text-sm font-medium">Card (Stripe)</p>
+                  <p className="text-xs text-gray-500">Pay securely with credit/debit card</p>
                 </div>
               </label>
             </div>
@@ -179,9 +163,7 @@ export default function CheckoutPage() {
           <div className="mt-6 space-y-4 border border-brand-border bg-white p-6">
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
-                <span>
-                  {item.name} × {item.quantity}
-                </span>
+                <span>{item.name} × {item.quantity}</span>
                 <span>PKR {(item.price * item.quantity).toLocaleString()}</span>
               </div>
             ))}
@@ -190,9 +172,7 @@ export default function CheckoutPage() {
                 <span>Subtotal</span>
                 <span>PKR {subtotal.toLocaleString()}</span>
               </div>
-              <p className="mt-1 text-xs text-gray-400">
-                Shipping calculated after confirmation
-              </p>
+              <p className="mt-1 text-xs text-gray-400">Shipping calculated after confirmation</p>
             </div>
           </div>
 
