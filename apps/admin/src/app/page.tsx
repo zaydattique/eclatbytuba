@@ -1,19 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@eclat/ui";
-
-const stats = [
-  { label: "Total Orders", value: "24", change: "+12%" },
-  { label: "Revenue", value: "PKR 486,000", change: "+8%" },
-  { label: "Products", value: "6", change: null },
-  { label: "Customers", value: "18", change: "+3" },
-];
-
-const recentOrders = [
-  { id: "ORD-1004", customer: "Ayesha Khan", total: 28500, status: "PENDING" },
-  { id: "ORD-1003", customer: "Sara Ahmed", total: 42000, status: "CONFIRMED" },
-  { id: "ORD-1002", customer: "Fatima Ali", total: 18500, status: "SHIPPED" },
-  { id: "ORD-1001", customer: "Zara Malik", total: 12500, status: "DELIVERED" },
-];
+import { getDashboardStats } from "@/lib/data";
 
 const statusVariant: Record<string, "warning" | "default" | "secondary" | "success"> = {
   PENDING: "warning",
@@ -22,23 +9,27 @@ const statusVariant: Record<string, "warning" | "default" | "secondary" | "succe
   DELIVERED: "success",
 };
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const stats = await getDashboardStats();
+
   return (
     <div>
       <h1 className="text-2xl font-semibold">Dashboard</h1>
       <p className="mt-1 text-sm text-gray-500">Welcome back to Éclat by Tuba admin.</p>
 
       <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
+        {[
+          { label: "Total Orders", value: String(stats.totalOrders) },
+          { label: "Revenue", value: `PKR ${Number(stats.revenue).toLocaleString()}` },
+          { label: "Products", value: String(stats.products) },
+          { label: "Customers", value: String(stats.customers) },
+        ].map((stat) => (
           <div
             key={stat.label}
             className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
           >
             <p className="text-sm font-medium text-gray-500">{stat.label}</p>
             <p className="mt-2 text-2xl font-semibold">{stat.value}</p>
-            {stat.change && (
-              <p className="mt-1 text-xs text-green-600">{stat.change} from last month</p>
-            )}
           </div>
         ))}
       </div>
@@ -54,36 +45,24 @@ export default function AdminDashboard() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Order
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Total
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Status
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Order</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Customer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {recentOrders.map((order) => (
+              {stats.recentOrders.map((order: any) => (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                    {order.id}
+                    <Link href={`/orders/${order.id}`} className="hover:underline">
+                      {order.orderNumber}
+                    </Link>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {order.customer}
-                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">{order.email}</td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm">PKR {Number(order.total).toLocaleString()}</td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm">
-                    PKR {order.total.toLocaleString()}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm">
-                    <Badge variant={statusVariant[order.status] || "default"}>
-                      {order.status}
-                    </Badge>
+                    <Badge variant={statusVariant[order.status] || "default"}>{order.status}</Badge>
                   </td>
                 </tr>
               ))}
