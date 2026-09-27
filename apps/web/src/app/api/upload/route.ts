@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { validateImageFile } from "@eclat/ui/media";
+import { validateImageFile } from "@eclat/ui";
 
 /**
  * Image upload — validates via packages/ui media helpers.
