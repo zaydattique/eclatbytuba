@@ -2,19 +2,33 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@eclat/ui";
+import { Button, Input } from "@eclat/ui";
 
-const STATUSES = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUSES = [
+  "PENDING",
+  "CONFIRMED",
+  "PROCESSING",
+  "SHIPPED",
+  "DELIVERED",
+  "CANCELLED",
+  "REFUNDED",
+];
 
 export function OrderStatusForm({
   orderId,
   currentStatus,
+  initialNotes,
+  initialTracking,
 }: {
   orderId: string;
   currentStatus: string;
+  initialNotes?: string | null;
+  initialTracking?: string | null;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState(currentStatus);
+  const [notes, setNotes] = useState(initialNotes || "");
+  const [trackingNumber, setTrackingNumber] = useState(initialTracking || "");
   const [loading, setLoading] = useState(false);
 
   const handleUpdate = async () => {
@@ -24,7 +38,11 @@ export function OrderStatusForm({
       const res = await fetch(`${base}/api/orders/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+          status,
+          notes: notes || null,
+          trackingNumber: trackingNumber || null,
+        }),
       });
       if (!res.ok) throw new Error("Failed to update");
       router.refresh();
@@ -39,20 +57,36 @@ export function OrderStatusForm({
   return (
     <div className="mt-3 space-y-3">
       <select
-        className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+        className="w-full rounded-[12px] border border-[#F0D6E0] px-3 py-2 text-sm text-[#2D2A2B] focus:outline-none focus:ring-2 focus:ring-[#C45C7A]/40"
         value={status}
         onChange={(e) => setStatus(e.target.value)}
       >
         {STATUSES.map((s) => (
-          <option key={s} value={s}>{s}</option>
+          <option key={s} value={s}>
+            {s}
+          </option>
         ))}
       </select>
-      <Button
-        onClick={handleUpdate}
-        disabled={loading || status === currentStatus}
-        className="w-full"
-      >
-        {loading ? "Updating..." : "Update Status"}
+      <div>
+        <label className="mb-1 block text-xs text-[#6B5E62]">Tracking number</label>
+        <Input
+          value={trackingNumber}
+          onChange={(e) => setTrackingNumber(e.target.value)}
+          placeholder="e.g. TCS123456"
+        />
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-[#6B5E62]">Internal notes</label>
+        <textarea
+          className="w-full rounded-[12px] border border-[#F0D6E0] px-3 py-2 text-sm text-[#2D2A2B] focus:outline-none focus:ring-2 focus:ring-[#C45C7A]/40"
+          rows={3}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Refund note, customer request…"
+        />
+      </div>
+      <Button onClick={handleUpdate} disabled={loading} className="w-full">
+        {loading ? "Updating..." : "Update order"}
       </Button>
     </div>
   );

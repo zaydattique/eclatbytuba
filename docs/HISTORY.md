@@ -4,42 +4,32 @@ Chronological log of every decision and code change. Every agent must append her
 
 ---
 
+## 2026-09-27 — Phase 3 complete
+
+**What**
+- Checkout Soft Gloss UI: shipping (standard/express), payments COD, bank transfer, JazzCash, EasyPaisa, Stripe.
+- POST /api/orders: checkout rate limit + sendOrderConfirmation (Resend or console mock).
+- updateOrderStatus accepts notes + trackingNumber (stored in notes as TRACKING: for Prisma).
+- Admin orders Soft Gloss list/detail; OrderStatusForm with tracking + notes + full status set.
+- Cart page Soft Gloss polish.
+
+**Why**
+- Close Phase 3 acceptance: full purchase path + admin fulfill without heavy new deps.
+
+---
+
 ## 2026-09-27 — Phase 2 complete
 
-**What**
-- `updateProduct` + `getAllProductImages` in packages/db; export from index.
-- PUT `/api/products` for updates; GET supports `?admin=true` for inactive products.
-- Admin edit page `/products/[id]` (load + save + images).
-- Admin media library `/media` (grid of product images).
-- Product list uses `getAdminProducts`, links name → edit, shows Inactive badge.
-- Soft Gloss Sidebar + Media nav item.
-- media.ts: production compression via Cloudflare Images preferred; no Sharp (perf).
-
-**Why**
-- Close remaining Phase 2 gaps (edit, media library, pipeline clarity) without heavy new deps or wholesale rewrites.
+updateProduct, edit page, media library, Soft Gloss admin nav, catalog seed only.
 
 ---
 
-## 2026-09-27 — Phase 2 progress (surgical fixes)
+## 2026-09-27 — Phase 2 progress + docs realign
 
-**What**
-- Replaced invented fashion products with catalog beauty items.
-- Soft Gloss Pastel on Button, Badge, Input, Card, ProductCard.
-- ProductCard: discount, low-stock, stars hooks.
-- Admin products search + Soft Gloss table.
-- Upload validation; createProduct accepts images; siteConfig + homepage beauty copy.
-
-**Why**
-- Align UI and data with Master Plan Soft Gloss Pastel + real catalog only.
-
----
-
-## 2026-09-27 — Docs realigned to Master Build Plan v2.0
-
-Rewrote PROJECT_PLAN phases 0–8; PHASES_STATUS, AGENTS, README fixed (no black/gold).
+Soft Gloss UI tokens; Master Plan phases 0–8 docs; no black/gold.
 
 ---
 
 ## Prior
 
-- Phase 0–1 foundation; storefront cart/header Soft Gloss work; security helpers.
+Phase 0–1 foundation; storefront cart context; security rate-limit helpers.

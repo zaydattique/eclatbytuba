@@ -5,6 +5,19 @@ import Link from "next/link";
 import { Button, Input } from "@eclat/ui";
 import { useCart } from "@/context/CartContext";
 
+const PAYMENT_OPTIONS = [
+  { value: "cod", label: "Cash on Delivery", hint: "Pay when you receive your order" },
+  { value: "bank_transfer", label: "Bank Transfer", hint: "We'll send account details after order" },
+  { value: "jazzcash", label: "JazzCash", hint: "Mobile wallet — instructions after order" },
+  { value: "easypaisa", label: "EasyPaisa", hint: "Mobile wallet — instructions after order" },
+  { value: "stripe", label: "Card (Stripe)", hint: "Pay securely with credit/debit card" },
+] as const;
+
+const SHIPPING_OPTIONS = [
+  { value: "standard", label: "Standard (3–5 days)", cost: 0 },
+  { value: "express", label: "Express (1–2 days)", cost: 250 },
+] as const;
+
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
   const [placed, setPlaced] = useState(false);
@@ -12,6 +25,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [shippingMethod, setShippingMethod] = useState("standard");
   const [form, setForm] = useState({
     email: "",
     fullName: "",
@@ -21,11 +35,15 @@ export default function CheckoutPage() {
     postalCode: "",
   });
 
+  const shippingCost =
+    SHIPPING_OPTIONS.find((s) => s.value === shippingMethod)?.cost ?? 0;
+  const total = subtotal + shippingCost;
+
   if (items.length === 0 && !placed) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-20 text-center">
-        <h1 className="font-serif text-3xl">Checkout</h1>
-        <p className="mt-4 text-gray-500">Your cart is empty.</p>
+        <h1 className="text-3xl font-semibold text-[#2D2A2B]">Checkout</h1>
+        <p className="mt-4 text-[#6B5E62]">Your cart is empty.</p>
         <Link href="/products" className="mt-8 inline-block">
           <Button>Continue Shopping</Button>
         </Link>
@@ -36,15 +54,15 @@ export default function CheckoutPage() {
   if (placed) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-20 text-center">
-        <h1 className="font-serif text-3xl">Thank you</h1>
-        <p className="mt-4 text-gray-600">
-          Your order <strong>{orderNumber}</strong> has been placed.
+        <h1 className="text-3xl font-semibold text-[#2D2A2B]">Thank you</h1>
+        <p className="mt-4 text-[#6B5E62]">
+          Your order <strong className="text-[#2D2A2B]">{orderNumber}</strong> has been placed.
         </p>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-[#6B5E62]">
           {paymentMethod === "cod"
             ? "We'll contact you shortly to confirm. Pay on delivery."
             : paymentMethod === "stripe"
-              ? "Payment received. We'll process your order shortly."
+              ? "Payment received (or mock). We'll process your order shortly."
               : "We'll send payment instructions shortly."}
         </p>
         <Link href="/products" className="mt-8 inline-block">
@@ -67,12 +85,14 @@ export default function CheckoutPage() {
           email: form.email,
           phone: form.phone,
           paymentMethod,
+          shippingMethod,
           shippingAddress: {
             fullName: form.fullName,
             line1: form.address,
             city: form.city,
             postalCode: form.postalCode,
             country: "PK",
+            shippingMethod,
           },
           items: items.map((i) => ({
             productId: i.productId,
@@ -92,16 +112,13 @@ export default function CheckoutPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            amount: subtotal,
+            amount: total,
             currency: "pkr",
             orderId: data.order.id,
           }),
         });
         const payData = await payRes.json();
         if (!payRes.ok) throw new Error(payData.error || "Payment failed");
-        if (payData.mock) {
-          console.log("Stripe mock payment:", payData.paymentIntentId);
-        }
       }
 
       setOrderNumber(data.order.orderNumber);
@@ -114,69 +131,134 @@ export default function CheckoutPage() {
     }
   };
 
+  const radioClass =
+    "flex cursor-pointer items-center gap-3 rounded-[16px] border border-[#F0D6E0] p-3 hover:bg-[#FFF0F5]";
+
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
-      <h1 className="font-serif text-3xl">Checkout</h1>
+      <h1 className="text-3xl font-semibold text-[#2D2A2B]">Checkout</h1>
 
       <form onSubmit={handleSubmit} className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-2">
         <div className="space-y-6">
-          <h2 className="text-lg font-medium">Contact & Shipping</h2>
-          <Input placeholder="Email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          <Input placeholder="Full Name" required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
-          <Input placeholder="Phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <Input placeholder="Address" required value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <h2 className="text-lg font-medium text-[#2D2A2B]">Contact & Shipping (Pakistan)</h2>
+          <Input
+            placeholder="Email"
+            type="email"
+            required
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <Input
+            placeholder="Full Name"
+            required
+            value={form.fullName}
+            onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+          />
+          <Input
+            placeholder="Phone (03XX…)"
+            required
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+          <Input
+            placeholder="Address"
+            required
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
+          />
           <div className="grid grid-cols-2 gap-4">
-            <Input placeholder="City" required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-            <Input placeholder="Postal Code" value={form.postalCode} onChange={(e) => setForm({ ...form, postalCode: e.target.value })} />
+            <Input
+              placeholder="City"
+              required
+              value={form.city}
+              onChange={(e) => setForm({ ...form, city: e.target.value })}
+            />
+            <Input
+              placeholder="Postal Code"
+              value={form.postalCode}
+              onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
+            />
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-medium">Payment Method</h3>
+            <h3 className="mb-3 text-sm font-medium text-[#2D2A2B]">Shipping</h3>
             <div className="space-y-2">
-              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
-                <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} />
-                <div>
-                  <p className="text-sm font-medium">Cash on Delivery</p>
-                  <p className="text-xs text-gray-500">Pay when you receive your order</p>
-                </div>
-              </label>
-              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
-                <input type="radio" name="payment" value="bank_transfer" checked={paymentMethod === "bank_transfer"} onChange={() => setPaymentMethod("bank_transfer")} />
-                <div>
-                  <p className="text-sm font-medium">Bank Transfer</p>
-                  <p className="text-xs text-gray-500">We'll send account details after order</p>
-                </div>
-              </label>
-              <label className="flex cursor-pointer items-center gap-3 rounded-md border border-brand-border p-3 hover:bg-brand-muted">
-                <input type="radio" name="payment" value="stripe" checked={paymentMethod === "stripe"} onChange={() => setPaymentMethod("stripe")} />
-                <div>
-                  <p className="text-sm font-medium">Card (Stripe)</p>
-                  <p className="text-xs text-gray-500">Pay securely with credit/debit card</p>
-                </div>
-              </label>
+              {SHIPPING_OPTIONS.map((opt) => (
+                <label key={opt.value} className={radioClass}>
+                  <input
+                    type="radio"
+                    name="shipping"
+                    value={opt.value}
+                    checked={shippingMethod === opt.value}
+                    onChange={() => setShippingMethod(opt.value)}
+                  />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-[#2D2A2B]">{opt.label}</p>
+                    <p className="text-xs text-[#6B5E62]">
+                      {opt.cost === 0 ? "Free" : `PKR ${opt.cost}`}
+                    </p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-3 text-sm font-medium text-[#2D2A2B]">Payment Method</h3>
+            <div className="space-y-2">
+              {PAYMENT_OPTIONS.map((opt) => (
+                <label key={opt.value} className={radioClass}>
+                  <input
+                    type="radio"
+                    name="payment"
+                    value={opt.value}
+                    checked={paymentMethod === opt.value}
+                    onChange={() => setPaymentMethod(opt.value)}
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-[#2D2A2B]">{opt.label}</p>
+                    <p className="text-xs text-[#6B5E62]">{opt.hint}</p>
+                  </div>
+                </label>
+              ))}
             </div>
           </div>
         </div>
 
         <div>
-          <h2 className="text-lg font-medium">Order Summary</h2>
-          <div className="mt-6 space-y-4 border border-brand-border bg-white p-6">
+          <h2 className="text-lg font-medium text-[#2D2A2B]">Order Summary</h2>
+          <div
+            className="mt-6 space-y-4 rounded-[24px] border border-[#F0D6E0] bg-white p-6"
+            style={{
+              boxShadow:
+                "0 4px 20px rgba(196, 92, 122, 0.08), 0 1px 3px rgba(196, 92, 122, 0.04)",
+            }}
+          >
             {items.map((item) => (
-              <div key={item.id} className="flex justify-between text-sm">
-                <span>{item.name} × {item.quantity}</span>
+              <div key={item.id} className="flex justify-between text-sm text-[#2D2A2B]">
+                <span>
+                  {item.name} × {item.quantity}
+                </span>
                 <span>PKR {(item.price * item.quantity).toLocaleString()}</span>
               </div>
             ))}
-            <div className="border-t border-brand-border pt-4">
-              <div className="flex justify-between font-medium">
+            <div className="border-t border-[#F0D6E0] pt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-[#6B5E62]">
                 <span>Subtotal</span>
                 <span>PKR {subtotal.toLocaleString()}</span>
               </div>
-              <p className="mt-1 text-xs text-gray-400">Shipping calculated after confirmation</p>
+              <div className="flex justify-between text-[#6B5E62]">
+                <span>Shipping</span>
+                <span>{shippingCost === 0 ? "Free" : `PKR ${shippingCost}`}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-[#2D2A2B]">
+                <span>Total</span>
+                <span>PKR {total.toLocaleString()}</span>
+              </div>
             </div>
           </div>
 
-          {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+          {error && <p className="mt-4 text-sm text-[#C45C5C]">{error}</p>}
 
           <Button type="submit" size="lg" className="mt-6 w-full" disabled={loading}>
             {loading ? "Placing Order..." : "Place Order"}
