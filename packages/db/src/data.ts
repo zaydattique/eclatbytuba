@@ -1,11 +1,9 @@
 /**
- * Data access layer for Éclat by Tuba
- * Uses Prisma when DATABASE_URL is available, otherwise in-memory store.
- * Seed products are from the official catalog + owner-approved Kiko — never invent.
+ * Data access layer — catalog from catalog-seed (67 Shopify products + Kiko)
  * Reviews require orderId (verified buyers only).
  */
 
-import { KIKO_3D_HYDRA, RHODE_SEO_PATCH } from "./seed-kiko";
+import catalogSeed from "./catalog-seed";
 
 const mem = {
   categories: [] as any[],
@@ -19,152 +17,21 @@ function ensureMemSeed() {
   if (mem.initialized) return;
   mem.initialized = true;
 
-  mem.categories = [
-    { id: "c1", name: "Cosmetic Kits", slug: "cosmetic-kits", sortOrder: 1, isActive: true },
-    { id: "c2", name: "Lipstick", slug: "lipstick", sortOrder: 2, isActive: true },
-    { id: "c3", name: "Lip Gloss", slug: "lip-gloss", sortOrder: 3, isActive: true },
-    { id: "c4", name: "Lip Sets", slug: "lip-sets", sortOrder: 4, isActive: true },
-    { id: "c5", name: "Nails", slug: "nails", sortOrder: 5, isActive: true },
-  ];
+  const seed = catalogSeed as any;
+  mem.categories = seed.categories.map((c: any) => ({ ...c }));
+  const catById = Object.fromEntries(mem.categories.map((c: any) => [c.id, c]));
 
-  mem.products = [
-    {
-      id: "p1",
-      name: "Éclat Everyday Glam Kit",
-      slug: "eclat-everyday-glam-kit",
-      description:
-        "Complete everyday glam kit for soft, glossy looks. Nationwide COD. Shipping Rs 250.",
-      fullDescription:
-        "Éclat Everyday Glam Kit is a handpicked daily kit for soft-gloss self-expression in Pakistan. Soft blush tones, treat-yourself vibes, and everything you need for an elevated everyday look. Cash on delivery available. Flat shipping Rs 250 across Pakistan.",
-      price: 2250,
-      compareAtPrice: 2999,
-      inventory: 24,
-      categoryId: "c1",
-      isActive: true,
-      isFeatured: true,
-      tags: ["kit", "everyday", "glam", "pakistan", "cod"],
-      images: [],
-      metadata: {
-        seoTitle: "Éclat Everyday Glam Kit Pakistan | Rs 2250 | COD",
-        seoDescription:
-          "Buy Éclat Everyday Glam Kit in Pakistan at Rs 2250. Soft gloss beauty kit. Nationwide COD, shipping Rs 250.",
-      },
-      category: mem.categories[0],
-    },
-    {
-      id: "p2",
-      name: "18-Color Mini Capsule Lipstick Pack",
-      slug: "18-color-mini-capsule-lipstick-pack",
-      description: "Eighteen mini capsule lipsticks for every mood. COD Pakistan.",
-      fullDescription:
-        "Eighteen mini capsule lipsticks from soft peach to deep berry — built for the Soft Gloss Pastel aesthetic. Order with cash on delivery. Shipping Rs 250 nationwide.",
-      price: 1299,
-      compareAtPrice: 2000,
-      inventory: 40,
-      categoryId: "c2",
-      isActive: true,
-      isFeatured: true,
-      tags: ["lipstick", "capsule", "set", "pakistan"],
-      images: [],
-      metadata: {
-        seoTitle: "18-Color Mini Capsule Lipstick Pack Pakistan | Rs 1299 | COD",
-        seoDescription:
-          "18-color mini capsule lipstick pack in Pakistan at Rs 1299. Nationwide COD, shipping Rs 250. Éclat by Tuba.",
-      },
-      category: mem.categories[1],
-    },
-    {
-      id: "p3",
-      name: "6-Shade Lipstick Set with Case",
-      slug: "6-shade-lipstick-set-with-case",
-      description: "Six essential shades with travel case. COD Pakistan.",
-      fullDescription:
-        "Six essential lip shades with travel case — soft nudes and rose tones. Cash on delivery. Shipping Rs 250 all Pakistan.",
-      price: 999,
-      compareAtPrice: 1499,
-      inventory: 35,
-      categoryId: "c3",
-      isActive: true,
-      isFeatured: true,
-      tags: ["lip", "set", "case"],
-      images: [],
-      metadata: {
-        seoTitle: "6-Shade Lipstick Set with Case Pakistan | Rs 999 | COD",
-        seoDescription:
-          "6-shade lipstick set with case in Pakistan at Rs 999. COD available. Shipping Rs 250.",
-      },
-      category: mem.categories[2],
-    },
-    {
-      id: "p4",
-      name: "Deal of 4 Rhode Lip Peptide (100% Original) Imported",
-      slug: "4-rhode-lip-peptide",
-      description:
-        "Four Rhode lip peptide — original imported. High demand in Lahore. COD Pakistan.",
-      fullDescription:
-        "Rhode Lip Peptide set (4) — original imported peptide lip treatment popular in Lahore. Limited stock messaging applies. Nationwide cash on delivery. Flat shipping Rs 250. Éclat by Tuba verifies purchases for reviews only after real orders.",
-      price: 1299,
-      compareAtPrice: 1999,
-      inventory: 8,
-      categoryId: "c4",
-      isActive: true,
-      isFeatured: true,
-      tags: ["rhode", "peptide", "lip", "pakistan", "cod", "original"],
-      images: [],
-      metadata: {
-        ...RHODE_SEO_PATCH,
-      },
-      category: mem.categories[3],
-    },
-    {
-      id: "p5",
-      name: "5-Shade Nude Nail Polish Set",
-      slug: "5-shade-nude-nail-polish-set",
-      description: "Soft nude nail polish set. COD Pakistan.",
-      fullDescription:
-        "Five nude nail polish shades for clean, elevated nails. Order COD. Shipping Rs 250 across Pakistan.",
-      price: 999,
-      compareAtPrice: 1600,
-      inventory: 22,
-      categoryId: "c5",
-      isActive: true,
-      isFeatured: false,
-      tags: ["nails", "nude"],
-      images: [],
-      metadata: {
-        seoTitle: "5-Shade Nude Nail Polish Set Pakistan | Rs 999 | COD",
-        seoDescription:
-          "Nude nail polish set Pakistan Rs 999. Five soft shades. COD, shipping Rs 250.",
-      },
-      category: mem.categories[4],
-    },
-    {
-      id: "p6",
-      name: "3-Piece Lip Gloss, Liner & Oil Set",
-      slug: "3-piece-lip-gloss-liner-oil-set",
-      description: "Gloss, liner, and oil — complete lip ritual. COD.",
-      fullDescription:
-        "Three-piece lip set for glossy, defined lips. Cash on delivery. Shipping Rs 250 all Pakistan.",
-      price: 799,
-      compareAtPrice: 1200,
-      inventory: 28,
-      categoryId: "c3",
-      isActive: true,
-      isFeatured: false,
-      tags: ["gloss", "liner", "oil"],
-      images: [],
-      metadata: {
-        seoTitle: "Lip Gloss Liner Oil Set Pakistan | Rs 799 | COD",
-        seoDescription:
-          "3-piece lip gloss, liner & oil set Pakistan Rs 799. COD, shipping Rs 250.",
-      },
-      category: mem.categories[2],
-    },
-    {
-      ...KIKO_3D_HYDRA,
-      category: mem.categories[2],
-    },
-  ];
+  mem.products = seed.products.map((p: any) => ({
+    ...p,
+    category: catById[p.categoryId] || null,
+  }));
+
+  const p1 =
+    mem.products.find((p: any) => p.slug === "eclat-everyday-glam-kit") ||
+    mem.products[0];
+  const pRhode =
+    mem.products.find((p: any) => p.slug === "4-rhode-lip-peptide") ||
+    mem.products[1];
 
   mem.orders = [
     {
@@ -174,11 +41,11 @@ function ensureMemSeed() {
       phone: "+92 300 1234567",
       status: "DELIVERED",
       paymentStatus: "PAID",
-      subtotal: 2250,
+      subtotal: Number(p1.price),
       shippingCost: 250,
       tax: 0,
       discount: 0,
-      total: 2500,
+      total: Number(p1.price) + 250,
       currency: "PKR",
       notes: null,
       trackingNumber: null,
@@ -193,14 +60,21 @@ function ensureMemSeed() {
       items: [
         {
           id: "oi1",
-          productId: "p1",
-          name: "Éclat Everyday Glam Kit",
-          price: 2250,
+          productId: p1.id,
+          name: p1.name,
+          price: Number(p1.price),
           quantity: 1,
-          total: 2250,
+          total: Number(p1.price),
         },
       ],
-      payments: [{ id: "pay1", amount: 2500, method: "cod", status: "PAID" }],
+      payments: [
+        {
+          id: "pay1",
+          amount: Number(p1.price) + 250,
+          method: "cod",
+          status: "PAID",
+        },
+      ],
     },
     {
       id: "o2",
@@ -209,11 +83,11 @@ function ensureMemSeed() {
       phone: "+92 321 7654321",
       status: "CONFIRMED",
       paymentStatus: "PENDING",
-      subtotal: 1299,
+      subtotal: Number(pRhode.price),
       shippingCost: 250,
       tax: 0,
       discount: 0,
-      total: 1549,
+      total: Number(pRhode.price) + 250,
       currency: "PKR",
       notes: null,
       trackingNumber: null,
@@ -228,14 +102,21 @@ function ensureMemSeed() {
       items: [
         {
           id: "oi2",
-          productId: "p4",
-          name: "Deal of 4 Rhode Lip Peptide (100% Original) Imported",
-          price: 1299,
+          productId: pRhode.id,
+          name: pRhode.name,
+          price: Number(pRhode.price),
           quantity: 1,
-          total: 1299,
+          total: Number(pRhode.price),
         },
       ],
-      payments: [{ id: "pay2", amount: 1549, method: "cod", status: "PENDING" }],
+      payments: [
+        {
+          id: "pay2",
+          amount: Number(pRhode.price) + 250,
+          method: "cod",
+          status: "PENDING",
+        },
+      ],
     },
   ];
 
