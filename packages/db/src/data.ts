@@ -1,9 +1,11 @@
 /**
  * Data access layer for Éclat by Tuba
  * Uses Prisma when DATABASE_URL is available, otherwise in-memory store.
- * Seed products are from the official 67-product catalog only — never invent.
+ * Seed products are from the official catalog + owner-approved Kiko — never invent.
  * Reviews require orderId (verified buyers only).
  */
+
+import { KIKO_3D_HYDRA, RHODE_SEO_PATCH } from "./seed-kiko";
 
 const mem = {
   categories: [] as any[],
@@ -30,40 +32,54 @@ function ensureMemSeed() {
       id: "p1",
       name: "Éclat Everyday Glam Kit",
       slug: "eclat-everyday-glam-kit",
-      description: "Complete everyday glam kit for soft, glossy looks.",
-      fullDescription: "Handpicked kit for daily self-expression — soft gloss, blush tones, and treat-yourself vibes.",
+      description:
+        "Complete everyday glam kit for soft, glossy looks. Nationwide COD. Shipping Rs 250.",
+      fullDescription:
+        "Éclat Everyday Glam Kit is a handpicked daily kit for soft-gloss self-expression in Pakistan. Soft blush tones, treat-yourself vibes, and everything you need for an elevated everyday look. Cash on delivery available. Flat shipping Rs 250 across Pakistan.",
       price: 2250,
       compareAtPrice: 2999,
       inventory: 24,
       categoryId: "c1",
       isActive: true,
       isFeatured: true,
-      tags: ["kit", "everyday", "glam"],
+      tags: ["kit", "everyday", "glam", "pakistan", "cod"],
       images: [],
+      metadata: {
+        seoTitle: "Éclat Everyday Glam Kit Pakistan | Rs 2250 | COD",
+        seoDescription:
+          "Buy Éclat Everyday Glam Kit in Pakistan at Rs 2250. Soft gloss beauty kit. Nationwide COD, shipping Rs 250.",
+      },
       category: mem.categories[0],
     },
     {
       id: "p2",
       name: "18-Color Mini Capsule Lipstick Pack",
       slug: "18-color-mini-capsule-lipstick-pack",
-      description: "Eighteen mini capsule lipsticks for every mood.",
-      fullDescription: "Shade range from soft peach to deep berry — perfect for the Soft Gloss Pastel aesthetic.",
+      description: "Eighteen mini capsule lipsticks for every mood. COD Pakistan.",
+      fullDescription:
+        "Eighteen mini capsule lipsticks from soft peach to deep berry — built for the Soft Gloss Pastel aesthetic. Order with cash on delivery. Shipping Rs 250 nationwide.",
       price: 1299,
       compareAtPrice: 2000,
       inventory: 40,
       categoryId: "c2",
       isActive: true,
       isFeatured: true,
-      tags: ["lipstick", "capsule", "set"],
+      tags: ["lipstick", "capsule", "set", "pakistan"],
       images: [],
+      metadata: {
+        seoTitle: "18-Color Mini Capsule Lipstick Pack Pakistan | Rs 1299 | COD",
+        seoDescription:
+          "18-color mini capsule lipstick pack in Pakistan at Rs 1299. Nationwide COD, shipping Rs 250. Éclat by Tuba.",
+      },
       category: mem.categories[1],
     },
     {
       id: "p3",
       name: "6-Shade Lipstick Set with Case",
       slug: "6-shade-lipstick-set-with-case",
-      description: "Six essential shades with travel case.",
-      fullDescription: "Curated lip set with case — soft nudes and rose tones.",
+      description: "Six essential shades with travel case. COD Pakistan.",
+      fullDescription:
+        "Six essential lip shades with travel case — soft nudes and rose tones. Cash on delivery. Shipping Rs 250 all Pakistan.",
       price: 999,
       compareAtPrice: 1499,
       inventory: 35,
@@ -72,30 +88,41 @@ function ensureMemSeed() {
       isFeatured: true,
       tags: ["lip", "set", "case"],
       images: [],
+      metadata: {
+        seoTitle: "6-Shade Lipstick Set with Case Pakistan | Rs 999 | COD",
+        seoDescription:
+          "6-shade lipstick set with case in Pakistan at Rs 999. COD available. Shipping Rs 250.",
+      },
       category: mem.categories[2],
     },
     {
       id: "p4",
       name: "Deal of 4 Rhode Lip Peptide (100% Original) Imported",
       slug: "4-rhode-lip-peptide",
-      description: "Four Rhode lip peptide — imported, bestseller energy.",
-      fullDescription: "Peptide lip treatment set. High demand in Lahore — limited stock messaging applies.",
+      description:
+        "Four Rhode lip peptide — original imported. High demand in Lahore. COD Pakistan.",
+      fullDescription:
+        "Rhode Lip Peptide set (4) — original imported peptide lip treatment popular in Lahore. Limited stock messaging applies. Nationwide cash on delivery. Flat shipping Rs 250. Éclat by Tuba verifies purchases for reviews only after real orders.",
       price: 1299,
       compareAtPrice: 1999,
       inventory: 8,
       categoryId: "c4",
       isActive: true,
       isFeatured: true,
-      tags: ["rhode", "peptide", "lip"],
+      tags: ["rhode", "peptide", "lip", "pakistan", "cod", "original"],
       images: [],
+      metadata: {
+        ...RHODE_SEO_PATCH,
+      },
       category: mem.categories[3],
     },
     {
       id: "p5",
       name: "5-Shade Nude Nail Polish Set",
       slug: "5-shade-nude-nail-polish-set",
-      description: "Soft nude nail polish set.",
-      fullDescription: "Five nude shades for clean, elevated nails.",
+      description: "Soft nude nail polish set. COD Pakistan.",
+      fullDescription:
+        "Five nude nail polish shades for clean, elevated nails. Order COD. Shipping Rs 250 across Pakistan.",
       price: 999,
       compareAtPrice: 1600,
       inventory: 22,
@@ -104,14 +131,20 @@ function ensureMemSeed() {
       isFeatured: false,
       tags: ["nails", "nude"],
       images: [],
+      metadata: {
+        seoTitle: "5-Shade Nude Nail Polish Set Pakistan | Rs 999 | COD",
+        seoDescription:
+          "Nude nail polish set Pakistan Rs 999. Five soft shades. COD, shipping Rs 250.",
+      },
       category: mem.categories[4],
     },
     {
       id: "p6",
       name: "3-Piece Lip Gloss, Liner & Oil Set",
       slug: "3-piece-lip-gloss-liner-oil-set",
-      description: "Gloss, liner, and oil — complete lip ritual.",
-      fullDescription: "Three-piece lip set for glossy, defined lips.",
+      description: "Gloss, liner, and oil — complete lip ritual. COD.",
+      fullDescription:
+        "Three-piece lip set for glossy, defined lips. Cash on delivery. Shipping Rs 250 all Pakistan.",
       price: 799,
       compareAtPrice: 1200,
       inventory: 28,
@@ -120,6 +153,15 @@ function ensureMemSeed() {
       isFeatured: false,
       tags: ["gloss", "liner", "oil"],
       images: [],
+      metadata: {
+        seoTitle: "Lip Gloss Liner Oil Set Pakistan | Rs 799 | COD",
+        seoDescription:
+          "3-piece lip gloss, liner & oil set Pakistan Rs 799. COD, shipping Rs 250.",
+      },
+      category: mem.categories[2],
+    },
+    {
+      ...KIKO_3D_HYDRA,
       category: mem.categories[2],
     },
   ];
@@ -133,19 +175,32 @@ function ensureMemSeed() {
       status: "DELIVERED",
       paymentStatus: "PAID",
       subtotal: 2250,
-      shippingCost: 0,
+      shippingCost: 250,
       tax: 0,
       discount: 0,
-      total: 2250,
+      total: 2500,
       currency: "PKR",
       notes: null,
       trackingNumber: null,
-      shippingAddress: { fullName: "Ayesha Khan", line1: "House 12, Street 5", city: "Lahore", country: "PK", shippingMethod: "standard" },
+      shippingAddress: {
+        fullName: "Ayesha Khan",
+        line1: "House 12, Street 5",
+        city: "Lahore",
+        country: "PK",
+        shippingMethod: "standard",
+      },
       createdAt: new Date("2026-09-26").toISOString(),
       items: [
-        { id: "oi1", productId: "p1", name: "Éclat Everyday Glam Kit", price: 2250, quantity: 1, total: 2250 },
+        {
+          id: "oi1",
+          productId: "p1",
+          name: "Éclat Everyday Glam Kit",
+          price: 2250,
+          quantity: 1,
+          total: 2250,
+        },
       ],
-      payments: [{ id: "pay1", amount: 2250, method: "cod", status: "PAID" }],
+      payments: [{ id: "pay1", amount: 2500, method: "cod", status: "PAID" }],
     },
     {
       id: "o2",
@@ -155,19 +210,32 @@ function ensureMemSeed() {
       status: "CONFIRMED",
       paymentStatus: "PENDING",
       subtotal: 1299,
-      shippingCost: 0,
+      shippingCost: 250,
       tax: 0,
       discount: 0,
-      total: 1299,
+      total: 1549,
       currency: "PKR",
       notes: null,
       trackingNumber: null,
-      shippingAddress: { fullName: "Sara Ahmed", line1: "Apt 4B, Gulberg", city: "Lahore", country: "PK", shippingMethod: "express" },
+      shippingAddress: {
+        fullName: "Sara Ahmed",
+        line1: "Apt 4B, Gulberg",
+        city: "Lahore",
+        country: "PK",
+        shippingMethod: "standard",
+      },
       createdAt: new Date("2026-09-25").toISOString(),
       items: [
-        { id: "oi2", productId: "p4", name: "Deal of 4 Rhode Lip Peptide (100% Original) Imported", price: 1299, quantity: 1, total: 1299 },
+        {
+          id: "oi2",
+          productId: "p4",
+          name: "Deal of 4 Rhode Lip Peptide (100% Original) Imported",
+          price: 1299,
+          quantity: 1,
+          total: 1299,
+        },
       ],
-      payments: [{ id: "pay2", amount: 1299, method: "cod", status: "PENDING" }],
+      payments: [{ id: "pay2", amount: 1549, method: "cod", status: "PENDING" }],
     },
   ];
 
@@ -175,17 +243,25 @@ function ensureMemSeed() {
 }
 
 function useDb() {
-  return Boolean(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("localhost:5432/eclat"));
+  return Boolean(
+    process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("localhost:5432/eclat")
+  );
 }
 
-function composeNotes(notes?: string | null, trackingNumber?: string | null): string | null {
+function composeNotes(
+  notes?: string | null,
+  trackingNumber?: string | null
+): string | null {
   const parts: string[] = [];
   if (trackingNumber) parts.push(`TRACKING:${trackingNumber}`);
   if (notes) parts.push(notes);
   return parts.length ? parts.join("\n") : null;
 }
 
-function parseNotesField(raw?: string | null): { notes: string | null; trackingNumber: string | null } {
+function parseNotesField(raw?: string | null): {
+  notes: string | null;
+  trackingNumber: string | null;
+} {
   if (!raw) return { notes: null, trackingNumber: null };
   const lines = raw.split("\n");
   let trackingNumber: string | null = null;
@@ -200,7 +276,10 @@ function parseNotesField(raw?: string | null): { notes: string | null; trackingN
 export async function getCategories() {
   if (useDb()) {
     const { prisma } = await import("./index");
-    return prisma.category.findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" } });
+    return prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+    });
   }
   ensureMemSeed();
   return mem.categories;
@@ -228,14 +307,18 @@ export async function getProducts(opts?: {
   let list = [...mem.products];
   if (activeOnly) list = list.filter((p) => p.isActive);
   if (opts?.featured) list = list.filter((p) => p.isFeatured);
-  if (opts?.categorySlug) list = list.filter((p) => p.category?.slug === opts.categorySlug);
+  if (opts?.categorySlug)
+    list = list.filter((p) => p.category?.slug === opts.categorySlug);
   return list;
 }
 
 export async function getProductBySlug(slug: string) {
   if (useDb()) {
     const { prisma } = await import("./index");
-    return prisma.product.findUnique({ where: { slug }, include: { category: true } });
+    return prisma.product.findUnique({
+      where: { slug },
+      include: { category: true },
+    });
   }
   ensureMemSeed();
   return mem.products.find((p) => p.slug === slug) || null;
@@ -244,7 +327,10 @@ export async function getProductBySlug(slug: string) {
 export async function getProductById(id: string) {
   if (useDb()) {
     const { prisma } = await import("./index");
-    return prisma.product.findUnique({ where: { id }, include: { category: true } });
+    return prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    });
   }
   ensureMemSeed();
   return mem.products.find((p) => p.id === id) || null;
@@ -328,7 +414,9 @@ export async function updateProduct(
         ...(data.slug !== undefined ? { slug: data.slug } : {}),
         ...(data.description !== undefined ? { description: data.description } : {}),
         ...(data.price !== undefined ? { price: data.price } : {}),
-        ...(data.compareAtPrice !== undefined ? { compareAtPrice: data.compareAtPrice } : {}),
+        ...(data.compareAtPrice !== undefined
+          ? { compareAtPrice: data.compareAtPrice }
+          : {}),
         ...(data.inventory !== undefined ? { inventory: data.inventory } : {}),
         ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
         ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
@@ -399,10 +487,21 @@ export async function createOrder(input: {
   email: string;
   phone?: string;
   shippingAddress: Record<string, any>;
-  items: { productId: string; name: string; price: number; quantity: number; imageUrl?: string }[];
+  items: {
+    productId: string;
+    name: string;
+    price: number;
+    quantity: number;
+    imageUrl?: string;
+  }[];
   paymentMethod?: string;
+  shippingCost?: number;
 }) {
   const subtotal = input.items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const shippingCost =
+    input.shippingCost ??
+    (input.shippingAddress?.shippingMethod === "express" ? 350 : 250);
+  const total = subtotal + shippingCost;
   const orderNumber = `ORD-${Date.now().toString().slice(-6)}`;
 
   if (useDb()) {
@@ -415,7 +514,8 @@ export async function createOrder(input: {
         status: "PENDING",
         paymentStatus: "PENDING",
         subtotal,
-        total: subtotal,
+        shippingCost,
+        total,
         currency: "PKR",
         shippingAddress: input.shippingAddress,
         items: {
@@ -430,7 +530,7 @@ export async function createOrder(input: {
         },
         payments: {
           create: {
-            amount: subtotal,
+            amount: total,
             method: input.paymentMethod || "cod",
             status: "PENDING",
             currency: "PKR",
@@ -450,10 +550,10 @@ export async function createOrder(input: {
     status: "PENDING",
     paymentStatus: "PENDING",
     subtotal,
-    shippingCost: 0,
+    shippingCost,
     tax: 0,
     discount: 0,
-    total: subtotal,
+    total,
     currency: "PKR",
     notes: null as string | null,
     trackingNumber: null as string | null,
@@ -470,7 +570,7 @@ export async function createOrder(input: {
     payments: [
       {
         id: `pay${Date.now()}`,
-        amount: subtotal,
+        amount: total,
         method: input.paymentMethod || "cod",
         status: "PENDING",
       },
@@ -494,7 +594,9 @@ export async function updateOrderStatus(
       opts?.notes !== undefined || opts?.trackingNumber !== undefined
         ? composeNotes(
             opts?.notes !== undefined ? opts.notes : parsed.notes,
-            opts?.trackingNumber !== undefined ? opts.trackingNumber : parsed.trackingNumber
+            opts?.trackingNumber !== undefined
+              ? opts.trackingNumber
+              : parsed.trackingNumber
           )
         : existing.notes;
 
@@ -520,7 +622,6 @@ export async function updateOrderStatus(
   return order;
 }
 
-/** Approved reviews for a product (photo reviews first). */
 export async function getProductReviews(productId: string) {
   if (useDb()) {
     const { prisma } = await import("./index");
@@ -563,10 +664,6 @@ export async function getAllReviews(opts?: { approvedOnly?: boolean }) {
   );
 }
 
-/**
- * Create verified review — orderId required.
- * Email must match order; product must be on order; order CONFIRMED/SHIPPED/DELIVERED.
- */
 export async function createReview(input: {
   productId: string;
   orderId: string;
@@ -578,9 +675,7 @@ export async function createReview(input: {
   imageUrl?: string;
 }) {
   const email = input.authorEmail.trim().toLowerCase();
-  if (input.rating < 1 || input.rating > 5) {
-    throw new Error("Rating must be 1–5");
-  }
+  if (input.rating < 1 || input.rating > 5) throw new Error("Rating must be 1–5");
 
   const order = await getOrderById(input.orderId);
   if (!order) throw new Error("Order not found");
