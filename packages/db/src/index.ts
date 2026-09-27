@@ -40,3 +40,11 @@ export {
   getHits,
   summarizeAnalytics,
 } from "./analytics-store";
+
+export {
+  getSettings,
+  getPublicSettings,
+  getAdminSettings,
+  updateSettings,
+} from "./settings-store";
+export type { StoreSettings, PaymentMethodId } from "./settings-store";
