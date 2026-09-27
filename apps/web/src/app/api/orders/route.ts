@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrders, createOrder } from "@eclat/db";
+import { rateLimit, RATE_LIMITS, clientKey } from "@eclat/config";
+import { sendOrderConfirmation } from "@eclat/emails";
 
 export async function GET() {
   try {
@@ -12,6 +14,27 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+    const rl = rateLimit({
+      key: clientKey("checkout", ip),
+      limit: RATE_LIMITS.checkout.limit,
+      windowMs: RATE_LIMITS.checkout.windowMs,
+    });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Too many checkout attempts. Please try again later." },
+        {
+          status: 429,
+          headers: rl.retryAfterMs
+            ? { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) }
+            : undefined,
+        }
+      );
+    }
+
     const body = await req.json();
 
     if (!body.email || !body.items?.length) {
@@ -24,10 +47,25 @@ export async function POST(req: NextRequest) {
     const order = await createOrder({
       email: body.email,
       phone: body.phone,
-      shippingAddress: body.shippingAddress || {},
+      shippingAddress: {
+        ...(body.shippingAddress || {}),
+        shippingMethod: body.shippingMethod || "standard",
+      },
       items: body.items,
       paymentMethod: body.paymentMethod || "cod",
     });
+
+    // Fire-and-forget confirmation (mock if no RESEND_API_KEY)
+    try {
+      await sendOrderConfirmation({
+        to: body.email,
+        orderNumber: (order as any).orderNumber,
+        total: Number((order as any).total),
+        paymentMethod: body.paymentMethod || "cod",
+      });
+    } catch (emailErr) {
+      console.warn("Order email skipped:", emailErr);
+    }
 
     return NextResponse.json({ order }, { status: 201 });
   } catch (e: any) {

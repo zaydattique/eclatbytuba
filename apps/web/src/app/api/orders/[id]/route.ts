@@ -26,7 +26,10 @@ export async function PATCH(
       return NextResponse.json({ error: "status is required" }, { status: 400 });
     }
 
-    const order = await updateOrderStatus(params.id, body.status);
+    const order = await updateOrderStatus(params.id, body.status, {
+      notes: body.notes,
+      trackingNumber: body.trackingNumber,
+    });
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }

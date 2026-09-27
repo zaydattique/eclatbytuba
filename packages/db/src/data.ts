@@ -136,7 +136,9 @@ function ensureMemSeed() {
       discount: 0,
       total: 2250,
       currency: "PKR",
-      shippingAddress: { fullName: "Ayesha Khan", line1: "House 12, Street 5", city: "Lahore", country: "PK" },
+      notes: null,
+      trackingNumber: null,
+      shippingAddress: { fullName: "Ayesha Khan", line1: "House 12, Street 5", city: "Lahore", country: "PK", shippingMethod: "standard" },
       createdAt: new Date("2026-09-26").toISOString(),
       items: [
         { id: "oi1", productId: "p1", name: "Éclat Everyday Glam Kit", price: 2250, quantity: 1, total: 2250 },
@@ -156,7 +158,9 @@ function ensureMemSeed() {
       discount: 0,
       total: 1299,
       currency: "PKR",
-      shippingAddress: { fullName: "Sara Ahmed", line1: "Apt 4B, Gulberg", city: "Lahore", country: "PK" },
+      notes: null,
+      trackingNumber: null,
+      shippingAddress: { fullName: "Sara Ahmed", line1: "Apt 4B, Gulberg", city: "Lahore", country: "PK", shippingMethod: "express" },
       createdAt: new Date("2026-09-25").toISOString(),
       items: [
         { id: "oi2", productId: "p4", name: "Deal of 4 Rhode Lip Peptide (100% Original) Imported", price: 1299, quantity: 1, total: 1299 },
@@ -168,6 +172,25 @@ function ensureMemSeed() {
 
 function useDb() {
   return Boolean(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("localhost:5432/eclat"));
+}
+
+function composeNotes(notes?: string | null, trackingNumber?: string | null): string | null {
+  const parts: string[] = [];
+  if (trackingNumber) parts.push(`TRACKING:${trackingNumber}`);
+  if (notes) parts.push(notes);
+  return parts.length ? parts.join("\n") : null;
+}
+
+function parseNotesField(raw?: string | null): { notes: string | null; trackingNumber: string | null } {
+  if (!raw) return { notes: null, trackingNumber: null };
+  const lines = raw.split("\n");
+  let trackingNumber: string | null = null;
+  const rest: string[] = [];
+  for (const line of lines) {
+    if (line.startsWith("TRACKING:")) trackingNumber = line.slice(9).trim();
+    else rest.push(line);
+  }
+  return { notes: rest.join("\n").trim() || null, trackingNumber };
 }
 
 export async function getCategories() {
@@ -329,15 +352,13 @@ export async function updateProduct(
   return mem.products[idx];
 }
 
-/** Collect unique image URLs from all products (media library). */
 export async function getAllProductImages(): Promise<
   { url: string; productId: string; productName: string }[]
 > {
   const products = await getProducts({ activeOnly: false });
   const out: { url: string; productId: string; productName: string }[] = [];
   for (const p of products) {
-    const imgs = p.images || [];
-    for (const url of imgs) {
+    for (const url of p.images || []) {
       if (url) out.push({ url, productId: p.id, productName: p.name });
     }
   }
@@ -347,9 +368,13 @@ export async function getAllProductImages(): Promise<
 export async function getOrders() {
   if (useDb()) {
     const { prisma } = await import("./index");
-    return prisma.order.findMany({
+    const orders = await prisma.order.findMany({
       include: { items: true, payments: true },
       orderBy: { createdAt: "desc" },
+    });
+    return orders.map((o) => {
+      const parsed = parseNotesField(o.notes);
+      return { ...o, notes: parsed.notes, trackingNumber: parsed.trackingNumber };
     });
   }
   ensureMemSeed();
@@ -359,10 +384,13 @@ export async function getOrders() {
 export async function getOrderById(id: string) {
   if (useDb()) {
     const { prisma } = await import("./index");
-    return prisma.order.findUnique({
+    const order = await prisma.order.findUnique({
       where: { id },
       include: { items: true, payments: true },
     });
+    if (!order) return null;
+    const parsed = parseNotesField(order.notes);
+    return { ...order, notes: parsed.notes, trackingNumber: parsed.trackingNumber };
   }
   ensureMemSeed();
   return mem.orders.find((o) => o.id === id) || null;
@@ -428,6 +456,8 @@ export async function createOrder(input: {
     discount: 0,
     total: subtotal,
     currency: "PKR",
+    notes: null as string | null,
+    trackingNumber: null as string | null,
     shippingAddress: input.shippingAddress,
     createdAt: new Date().toISOString(),
     items: input.items.map((i, idx) => ({
@@ -451,23 +481,43 @@ export async function createOrder(input: {
   return order;
 }
 
-export async function updateOrderStatus(id: string, status: string) {
+export async function updateOrderStatus(
+  id: string,
+  status: string,
+  opts?: { notes?: string; trackingNumber?: string }
+) {
   if (useDb()) {
     const { prisma } = await import("./index");
-    return prisma.order.update({
+    const existing = await prisma.order.findUnique({ where: { id } });
+    if (!existing) return null;
+    const parsed = parseNotesField(existing.notes);
+    const nextNotes =
+      opts?.notes !== undefined || opts?.trackingNumber !== undefined
+        ? composeNotes(
+            opts?.notes !== undefined ? opts.notes : parsed.notes,
+            opts?.trackingNumber !== undefined ? opts.trackingNumber : parsed.trackingNumber
+          )
+        : existing.notes;
+
+    const updated = await prisma.order.update({
       where: { id },
       data: {
         status: status as any,
+        notes: nextNotes,
         ...(status === "SHIPPED" ? { shippedAt: new Date() } : {}),
         ...(status === "DELIVERED" ? { deliveredAt: new Date() } : {}),
       },
       include: { items: true, payments: true },
     });
+    const out = parseNotesField(updated.notes);
+    return { ...updated, notes: out.notes, trackingNumber: out.trackingNumber };
   }
   ensureMemSeed();
   const order = mem.orders.find((o) => o.id === id);
   if (!order) return null;
   order.status = status;
+  if (opts?.notes !== undefined) order.notes = opts.notes;
+  if (opts?.trackingNumber !== undefined) order.trackingNumber = opts.trackingNumber;
   return order;
 }
 
