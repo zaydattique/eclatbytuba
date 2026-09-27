@@ -12,13 +12,12 @@
 | 5 | Analytics Dashboard + Meta/Google Pixels | ✅ |
 | 6 | Interactive Play + Email/Payment Config in Admin | ✅ |
 | 7 | SEO / AEO / PWA / Security / Performance | ✅ |
-| 8 | Import 67 Products + Content + Launch | ❌ |
+| 8 | Import 67 Products + Content + Launch | ✅ |
 
-## Phase 7 checklist
-- [x] Kiko 3D Hydra @ Rs 1499 + 6 shades in seed
-- [x] COD + Shipping Rs 250 + All Pakistan (footer, PDP, orders)
-- [x] sitemap + robots (noindex cart/checkout)
-- [x] Product + FAQ + Breadcrumb JSON-LD; seoTitle/seoDescription
-- [x] PWA manifest.webmanifest + theme-color
-- [x] Security headers in next.config
-- [x] Soft Gloss + Plus Jakarta Sans retained
+## Phase 8 checklist
+- [x] Import 67 products from Shopify clean JSON (+ Kiko owner add = 68)
+- [x] Categories mapped from product_type
+- [x] Images, prices, compare-at, tags, variants preserved
+- [x] Per-product seoTitle / seoDescription (Pakistan · COD · Rs)
+- [x] Shipping Rs 250 + COD trust already sitewide (Phase 7)
+- [x] Soft Gloss + Plus Jakarta Sans unchanged

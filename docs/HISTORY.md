@@ -2,33 +2,27 @@
 
 ---
 
-## 2026-09-27 — Phase 7 complete (SEO / AEO / PWA / security)
+## 2026-09-28 — Phase 8 complete: full catalog import
 
 **What**
-- Kiko 3D Hydra merged into mem seed (p7) with 6 shade variants + SEO metadata; Rhode/Glam SEO patches
-- PDP: answer-first blurb, canonical/seoTitle/seoDescription, BreadcrumbList + Product/Offer + FAQ + Organization JSON-LD, shade table, COD·Rs250 trust box
-- Sitewide trust: footer strip COD · Shipping Rs 250 · All Pakistan; createOrder default shipping Rs 250
-- PWA: public/manifest.webmanifest + layout themeColor/manifest link
-- Security: CSP + nosniff + frame-deny headers in next.config
-- robots disallow cart/checkout/api
-
-**Security/perf notes**
-- Rate limits already on checkout/reviews/login
-- Secrets not returned on public settings GET
-- Pixels env-gated; no Sharp (Cloudflare path documented Phase 2)
-- Next headers CSP allows Stripe + GTM + Meta pixel only as needed
+- Imported `eclat_products_clean.json` (67 products) into `packages/db/src/catalog-seed.ts`
+- Categories: cosmetic-kits, lipstick, lip-gloss, lip-sets, nails, tools, eyes, face
+- Each product: Shopify images CDN, price/compare, tags, variants, plain-text description from body_html
+- SEO metadata on every SKU: `{title} Pakistan | Rs X | COD` + COD/Rs 250 description
+- Kiko 3D Hydra retained as owner add if not in Shopify export
+- `data.ts` mem seed loads catalog only (no invented fashion products)
 
 **Why**
-- Phase 7 acceptance: technical SEO + AEO on PDPs + Kiko + shipping facts + PWA basics
+- Phase 8 DoD: full catalog purchasable in mem/dev; owner can manage from admin
 
 ---
 
-## 2026-09-27 — Phase 6 wire-up
+## 2026-09-27 — Phase 7 complete
 
-Play + settings-driven payments/email.
+SEO/AEO PDP, PWA, security headers, Rs 250 shipping.
 
 ---
 
 ## Prior
 
-Phases 0–5 foundation through analytics.
+Phases 0–6 foundation through play/settings.
