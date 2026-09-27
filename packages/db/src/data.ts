@@ -2,12 +2,14 @@
  * Data access layer for Éclat by Tuba
  * Uses Prisma when DATABASE_URL is available, otherwise in-memory store.
  * Seed products are from the official 67-product catalog only — never invent.
+ * Reviews require orderId (verified buyers only).
  */
 
 const mem = {
   categories: [] as any[],
   products: [] as any[],
   orders: [] as any[],
+  reviews: [] as any[],
   initialized: false,
 };
 
@@ -128,8 +130,8 @@ function ensureMemSeed() {
       orderNumber: "ORD-1004",
       email: "ayesha@email.com",
       phone: "+92 300 1234567",
-      status: "PENDING",
-      paymentStatus: "PENDING",
+      status: "DELIVERED",
+      paymentStatus: "PAID",
       subtotal: 2250,
       shippingCost: 0,
       tax: 0,
@@ -143,7 +145,7 @@ function ensureMemSeed() {
       items: [
         { id: "oi1", productId: "p1", name: "Éclat Everyday Glam Kit", price: 2250, quantity: 1, total: 2250 },
       ],
-      payments: [{ id: "pay1", amount: 2250, method: "cod", status: "PENDING" }],
+      payments: [{ id: "pay1", amount: 2250, method: "cod", status: "PAID" }],
     },
     {
       id: "o2",
@@ -168,6 +170,8 @@ function ensureMemSeed() {
       payments: [{ id: "pay2", amount: 1299, method: "cod", status: "PENDING" }],
     },
   ];
+
+  mem.reviews = [];
 }
 
 function useDb() {
@@ -208,7 +212,6 @@ export async function getProducts(opts?: {
   activeOnly?: boolean;
 }) {
   const activeOnly = opts?.activeOnly !== false;
-
   if (useDb()) {
     const { prisma } = await import("./index");
     return prisma.product.findMany({
@@ -344,11 +347,7 @@ export async function updateProduct(
     data.categoryId !== undefined
       ? mem.categories.find((c) => c.id === data.categoryId) || null
       : prev.category;
-  mem.products[idx] = {
-    ...prev,
-    ...data,
-    category: cat,
-  };
+  mem.products[idx] = { ...prev, ...data, category: cat };
   return mem.products[idx];
 }
 
@@ -519,6 +518,142 @@ export async function updateOrderStatus(
   if (opts?.notes !== undefined) order.notes = opts.notes;
   if (opts?.trackingNumber !== undefined) order.trackingNumber = opts.trackingNumber;
   return order;
+}
+
+/** Approved reviews for a product (photo reviews first). */
+export async function getProductReviews(productId: string) {
+  if (useDb()) {
+    const { prisma } = await import("./index");
+    return prisma.review.findMany({
+      where: { productId, isApproved: true },
+      orderBy: [{ imageUrl: "desc" }, { createdAt: "desc" }],
+    });
+  }
+  ensureMemSeed();
+  return mem.reviews
+    .filter((r) => r.productId === productId && r.isApproved)
+    .sort((a, b) => {
+      if (a.imageUrl && !b.imageUrl) return -1;
+      if (!a.imageUrl && b.imageUrl) return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+}
+
+export async function getReviewStats(productId: string) {
+  const reviews = await getProductReviews(productId);
+  if (!reviews.length) return { average: 0, count: 0 };
+  const sum = reviews.reduce((s: number, r: any) => s + r.rating, 0);
+  return { average: sum / reviews.length, count: reviews.length };
+}
+
+export async function getAllReviews(opts?: { approvedOnly?: boolean }) {
+  if (useDb()) {
+    const { prisma } = await import("./index");
+    return prisma.review.findMany({
+      where: opts?.approvedOnly ? { isApproved: true } : undefined,
+      orderBy: { createdAt: "desc" },
+      include: { product: true },
+    });
+  }
+  ensureMemSeed();
+  let list = [...mem.reviews];
+  if (opts?.approvedOnly) list = list.filter((r) => r.isApproved);
+  return list.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+/**
+ * Create verified review — orderId required.
+ * Email must match order; product must be on order; order CONFIRMED/SHIPPED/DELIVERED.
+ */
+export async function createReview(input: {
+  productId: string;
+  orderId: string;
+  authorEmail: string;
+  authorName?: string;
+  rating: number;
+  title?: string;
+  body?: string;
+  imageUrl?: string;
+}) {
+  const email = input.authorEmail.trim().toLowerCase();
+  if (input.rating < 1 || input.rating > 5) {
+    throw new Error("Rating must be 1–5");
+  }
+
+  const order = await getOrderById(input.orderId);
+  if (!order) throw new Error("Order not found");
+  if ((order as any).email?.toLowerCase() !== email) {
+    throw new Error("Email does not match this order");
+  }
+  const allowed = ["CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"];
+  if (!allowed.includes((order as any).status)) {
+    throw new Error("Order is not eligible for review yet");
+  }
+  const onOrder = ((order as any).items || []).some(
+    (i: any) => i.productId === input.productId
+  );
+  if (!onOrder) throw new Error("Product was not in this order");
+
+  if (useDb()) {
+    const { prisma } = await import("./index");
+    const existing = await prisma.review.findUnique({
+      where: {
+        productId_orderId: { productId: input.productId, orderId: input.orderId },
+      },
+    });
+    if (existing) throw new Error("You already reviewed this product for this order");
+    return prisma.review.create({
+      data: {
+        productId: input.productId,
+        orderId: input.orderId,
+        authorEmail: email,
+        authorName: input.authorName,
+        rating: input.rating,
+        title: input.title,
+        body: input.body,
+        imageUrl: input.imageUrl,
+        isApproved: false,
+      },
+    });
+  }
+
+  ensureMemSeed();
+  if (
+    mem.reviews.some(
+      (r) => r.productId === input.productId && r.orderId === input.orderId
+    )
+  ) {
+    throw new Error("You already reviewed this product for this order");
+  }
+  const review = {
+    id: `r${Date.now()}`,
+    productId: input.productId,
+    orderId: input.orderId,
+    authorEmail: email,
+    authorName: input.authorName || null,
+    rating: input.rating,
+    title: input.title || null,
+    body: input.body || null,
+    imageUrl: input.imageUrl || null,
+    isApproved: false,
+    createdAt: new Date().toISOString(),
+  };
+  mem.reviews.push(review);
+  return review;
+}
+
+export async function moderateReview(id: string, isApproved: boolean) {
+  if (useDb()) {
+    const { prisma } = await import("./index");
+    return prisma.review.update({ where: { id }, data: { isApproved } });
+  }
+  ensureMemSeed();
+  const r = mem.reviews.find((x) => x.id === id);
+  if (!r) return null;
+  r.isApproved = isApproved;
+  return r;
 }
 
 export async function getDashboardStats() {

@@ -28,4 +28,9 @@ export {
   createOrder,
   updateOrderStatus,
   getDashboardStats,
+  getProductReviews,
+  getReviewStats,
+  getAllReviews,
+  createReview,
+  moderateReview,
 } from "./data";
