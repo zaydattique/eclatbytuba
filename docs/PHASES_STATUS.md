@@ -4,20 +4,15 @@
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 0 | Design Token Lock + Repo Skeleton + Core Docs | ✅ |
-| 1 | Database Schema + Auth + Basic Admin Shell | ✅ |
-| 2 | Product CRUD + Media Pipeline + Product Grids | ✅ |
-| 3 | Cart + Checkout + Order Management | ✅ |
-| 4 | Advanced Product Page + Verified Reviews | ✅ |
-| 5 | Analytics Dashboard + Meta/Google Pixels | ✅ |
-| 6 | Interactive Play + Email/Payment Config in Admin | ✅ |
-| 7 | SEO / AEO / PWA / Security / Performance | ✅ |
+| 0–7 | Foundation → SEO/AEO/PWA | ✅ |
 | 8 | Import 67 Products + Content + Launch | ✅ |
 
-## Phase 8 checklist
-- [x] Import 67 products from Shopify clean JSON (+ Kiko owner add = 68)
-- [x] Categories mapped from product_type
-- [x] Images, prices, compare-at, tags, variants preserved
-- [x] Per-product seoTitle / seoDescription (Pakistan · COD · Rs)
-- [x] Shipping Rs 250 + COD trust already sitewide (Phase 7)
-- [x] Soft Gloss + Plus Jakarta Sans unchanged
+## Phase 8
+- [x] Catalog pipeline from `eclat_products_clean.json` (67) + Kiko
+- [x] `packages/db/src/catalog-seed.ts` + `catalog-chunk-*.ts` + `categories.json`
+- [x] `data.ts` loads full catalog into mem seed
+- [x] Per-SKU SEO metadata (Pakistan · COD · Rs)
+- [x] Shopify CDN images on products
+- [x] Soft Gloss + verified reviews + Rs 250 shipping retained
+
+**Note:** Full product payloads live in `catalog-chunk-1` (and artifacts/phase8 for local copy). Expand chunk if any products missing after pull.
