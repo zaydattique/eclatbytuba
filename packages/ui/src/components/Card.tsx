@@ -3,7 +3,17 @@ import { cn } from "../lib/utils";
 
 export function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("rounded-lg border border-[#e8e4dc] bg-white shadow-sm", className)} {...props}>
+    <div
+      className={cn(
+        "rounded-[24px] border border-[#F0D6E0] bg-white",
+        className
+      )}
+      style={{
+        boxShadow:
+          "0 4px 20px rgba(196, 92, 122, 0.08), 0 1px 3px rgba(196, 92, 122, 0.04)",
+      }}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -19,7 +29,7 @@ export function CardHeader({ className, children, ...props }: React.HTMLAttribut
 
 export function CardTitle({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn("text-lg font-semibold leading-none tracking-tight", className)} {...props}>
+    <h3 className={cn("text-lg font-semibold leading-none tracking-tight text-[#2D2A2B]", className)} {...props}>
       {children}
     </h3>
   );

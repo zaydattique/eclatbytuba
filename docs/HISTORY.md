@@ -4,28 +4,42 @@ Chronological log of every decision and code change. Every agent must append her
 
 ---
 
+## 2026-09-27 — Phase 2 progress (surgical fixes)
+
+**What**
+- Replaced invented fashion products (Silk Gown, Cashmere Coat, etc.) with real catalog beauty items from PRODUCTS_CATALOG.md in `packages/db/src/data.ts` and admin products lib.
+- Soft Gloss Pastel applied to Button, Badge, Input, Card, ProductCard (removed black #1a1a1a / gold #c9a86c).
+- ProductCard: 24px radius, dual soft shadow, discount %, low-stock badge, optional stars.
+- Admin products list: Soft Gloss table, search by q, low-stock hint.
+- Upload route uses `validateImageFile` from packages/ui/media; max 5MB aligned.
+- createProduct accepts `images` array.
+- ImageUpload Soft Gloss borders/buttons.
+- siteConfig exported from @eclat/config; homepage beauty copy (no fashion/luxury black theme).
+- media.ts MAX 5MB to match upload route.
+
+**Why**
+- Phase 2 requires Soft Gloss Pastel grids/cards, real product data only, working media validation, admin product list usable.
+- No new files; surgical edits only. Compression (Sharp/R2) still deferred for performance — validation + storage in place.
+
+---
+
 ## 2026-09-27 — Docs realigned to Master Build Plan v2.0
 
 **What**
-- Rewrote `docs/PROJECT_PLAN.md` to match Master Build Plan phases 0–8 with full tasks, acceptance criteria, and Definition of Done for each phase.
-- Updated `docs/PHASES_STATUS.md` to the same phase list and realistic current status.
-- Strengthened `docs/AGENTS.md` so every agent treats Master Plan + PROJECT_PLAN as single source of truth.
-- Fixed `README.md` brand colors (removed black/gold) and outdated phase table; pointed to Soft Gloss Pastel + Plus Jakarta Sans.
+- Rewrote PROJECT_PLAN.md phases 0–8 with full tasks/AC/DoD.
+- Updated PHASES_STATUS, AGENTS, README (Soft Gloss; no black/gold).
 
 **Why**
-- Previous phase numbering and README still reflected an older (black/gold) theme and a simplified phase list. One agent had applied black + gold; user corrected theme to Soft Gloss Pastel. Docs must prevent that regression and give every future agent exact, detailed instructions so work does not diverge.
+- Prevent theme regression and give agents exact instructions.
 
 ---
 
 ## 2026-09-27 — Phase 4 storefront work (pre-realignment note)
 
-Storefront Soft Gloss Pastel progress (now mapped under Phases 2–3):
+Storefront Soft Gloss Pastel progress (mapped under Phases 2–3):
 - Header + Footer + Cart drawer (localStorage)
 - Product cards, homepage, collections grid, quick PDP
 - Policy pages; checkout still placeholder
-- Real sample products from extracted catalog
-
-Theme confirmed: Soft Gloss Pastel · Font: Plus Jakarta Sans only.
 
 ---
 

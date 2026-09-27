@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { validateImageFile } from "@eclat/ui/media";
 
 /**
- * Simple image upload endpoint.
+ * Image upload — validates via packages/ui media helpers.
  * Saves to public/uploads/ in development.
- * In production, swap for Cloudinary / S3 / Vercel Blob.
+ * Production: swap for Cloudflare R2 / Images + compression pipeline.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -16,16 +17,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-    if (!allowed.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Only JPEG, PNG, WebP, GIF allowed" },
-        { status: 400 }
-      );
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "Max 5MB" }, { status: 400 });
+    const validationError = validateImageFile({ type: file.type, size: file.size });
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();

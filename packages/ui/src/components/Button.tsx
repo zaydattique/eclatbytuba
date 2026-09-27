@@ -17,16 +17,19 @@ export function Button({
     "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
 
   const variants = {
-    primary: "bg-[#1a1a1a] text-white hover:bg-[#333] focus-visible:ring-[#c9a86c]",
-    secondary: "bg-[#c9a86c] text-[#1a1a1a] hover:bg-[#b8954f] focus-visible:ring-[#1a1a1a]",
-    outline: "border border-[#1a1a1a] bg-transparent hover:bg-[#f5f3ef]",
-    ghost: "hover:bg-[#f5f3ef]",
+    primary:
+      "bg-[#C45C7A] text-white hover:bg-[#A84A66] focus-visible:ring-[#C45C7A] shadow-[0_2px_8px_rgba(196,92,122,0.2)]",
+    secondary:
+      "bg-[#D4A574] text-[#2D2A2B] hover:bg-[#c49564] focus-visible:ring-[#D4A574]",
+    outline:
+      "border border-[#F0D6E0] bg-transparent text-[#2D2A2B] hover:bg-[#FFE8F0]",
+    ghost: "hover:bg-[#FFE8F0] text-[#2D2A2B]",
   };
 
   const sizes = {
-    sm: "h-8 px-3 text-sm rounded-md",
-    md: "h-10 px-5 text-sm rounded-md",
-    lg: "h-12 px-8 text-base rounded-lg",
+    sm: "h-8 px-3 text-sm rounded-[12px]",
+    md: "h-10 px-5 text-sm rounded-[20px]",
+    lg: "h-12 px-8 text-base rounded-[24px]",
   };
 
   return (

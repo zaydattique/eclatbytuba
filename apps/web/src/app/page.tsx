@@ -9,33 +9,33 @@ export default async function HomePage() {
 
   return (
     <main>
-      <section className="relative flex min-h-[80vh] flex-col items-center justify-center px-6 text-center">
-        <p className="mb-4 text-sm uppercase tracking-[0.3em] text-brand-secondary">
-          New Collection
+      <section className="relative flex min-h-[70vh] flex-col items-center justify-center px-6 text-center">
+        <p className="mb-4 text-sm uppercase tracking-[0.25em] text-[#C45C7A]">
+          Soft Gloss · Self-care
         </p>
-        <h1 className="font-serif text-5xl font-medium tracking-tight md:text-7xl">
+        <h1 className="text-4xl font-semibold tracking-tight text-[#2D2A2B] md:text-6xl">
           {siteConfig.name}
         </h1>
-        <p className="mt-6 max-w-md text-lg text-gray-600">
-          Timeless elegance. Modern luxury. Crafted for the woman who knows her worth.
+        <p className="mt-6 max-w-md text-lg text-[#6B5E62]">
+          Soft, glossy, elevated beauty for GenZ & young pros. Treat yourself — handpicked in Lahore vibes.
         </p>
-        <div className="mt-10 flex gap-4">
+        <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link href="/products">
             <Button size="lg">Shop Now</Button>
           </Link>
-          <Link href="/products?category=dresses">
+          <Link href="/products">
             <Button variant="outline" size="lg">
-              Explore Collection
+              View Collection
             </Button>
           </Link>
         </div>
       </section>
 
-      <section className="border-t border-brand-border px-6 py-20">
+      <section className="border-t border-[#F0D6E0] px-6 py-16">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-12 flex items-end justify-between">
-            <h2 className="font-serif text-3xl">Featured Pieces</h2>
-            <Link href="/products" className="text-sm underline hover:text-brand-secondary">
+          <div className="mb-10 flex items-end justify-between">
+            <h2 className="text-2xl font-semibold text-[#2D2A2B]">Bestsellers</h2>
+            <Link href="/products" className="text-sm text-[#C45C7A] hover:underline">
               View all
             </Link>
           </div>
@@ -48,6 +48,7 @@ export default async function HomePage() {
                 compareAtPrice={product.compareAtPrice}
                 imageUrl={product.images[0]}
                 href={`/products/${product.slug}`}
+                inventory={product.inventory}
               />
             ))}
           </div>
