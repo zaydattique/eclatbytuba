@@ -34,3 +34,9 @@ export {
   createReview,
   moderateReview,
 } from "./data";
+
+export {
+  recordHit,
+  getHits,
+  summarizeAnalytics,
+} from "./analytics-store";
