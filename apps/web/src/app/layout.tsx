@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@eclat/config";
 import { CartProvider } from "@/context/CartContext";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AnalyticsBeacon } from "@/components/AnalyticsBeacon";
+import { PixelScripts } from "@/components/PixelScripts";
 
-/** Single font family only — Plus Jakarta Sans (Master Plan locked). */
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -52,10 +54,14 @@ export default function RootLayout({
         className={`${plusJakarta.variable} font-sans antialiased`}
         style={{ background: "#FFF0F5", color: "#2D2A2B" }}
       >
+        <PixelScripts />
         <CartProvider>
           <Header />
           {children}
           <Footer />
+          <Suspense fallback={null}>
+            <AnalyticsBeacon />
+          </Suspense>
         </CartProvider>
       </body>
     </html>

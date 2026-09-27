@@ -4,6 +4,7 @@ import { Button } from "@eclat/ui";
 import { useCart } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
 import { useState } from "react";
+import { trackEvent } from "@/components/AnalyticsBeacon";
 
 export function AddToCartButton({
   product,
@@ -24,6 +25,11 @@ export function AddToCartButton({
       price: Number(product.price),
       imageUrl: product.images[0] || null,
       slug: product.slug,
+    });
+    trackEvent("add_to_cart", {
+      productId: product.id,
+      name: product.name,
+      price: Number(product.price),
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);

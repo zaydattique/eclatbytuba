@@ -2,31 +2,27 @@
 
 ---
 
-## 2026-09-27 — Phase 4 complete
+## 2026-09-27 — Phase 5 complete
 
 **What**
-- Advanced PDP: ProductGallery, sticky ATC, ProductAccordions, low-stock, related “Complete the look”, JSON-LD Product+FAQ+AggregateRating.
-- Verified reviews: orderId required; email must match order; product on order; status CONFIRMED+; rate limit; admin /reviews moderate.
-- Schema Review: orderId, authorEmail, imageUrl; unique productId+orderId.
-- Layout: Plus Jakarta Sans only (removed Inter + Playfair violation).
+- First-party analytics store + POST/GET `/api/analytics`
+- AnalyticsBeacon (session duration, engagement, page_view, UTM, device)
+- Funnel track: add_to_cart, begin_checkout, purchase
+- PixelScripts: NEXT_PUBLIC_GA_ID, NEXT_PUBLIC_META_PIXEL_ID
+- Admin `/analytics` full metric map (live + external-pending)
+- Soft Gloss dashboard polish
 
 **Why**
-- Master Plan Phase 4 acceptance; no guest/fake reviews.
+- User metric wishlist + Master Plan avg session duration + pixels without heavy SDKs.
 
 ---
 
-## 2026-09-27 — Phase 3 complete
+## 2026-09-27 — Phase 4 complete
 
-Checkout Soft Gloss, shipping, local payments, rate-limit, email mock, admin tracking/notes.
-
----
-
-## 2026-09-27 — Phase 2 complete
-
-Product CRUD, media library, Soft Gloss UI, catalog seed only.
+Advanced PDP + verified reviews (orderId) + Plus Jakarta Sans only.
 
 ---
 
-## Prior
+## 2026-09-27 — Phase 3–2 complete
 
-Docs realign to Master Plan; Phase 0–1 foundation.
+Checkout/orders; product CRUD + media.

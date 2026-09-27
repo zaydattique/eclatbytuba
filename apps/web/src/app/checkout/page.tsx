@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button, Input } from "@eclat/ui";
 import { useCart } from "@/context/CartContext";
+import { trackEvent } from "@/components/AnalyticsBeacon";
 
 const PAYMENT_OPTIONS = [
   { value: "cod", label: "Cash on Delivery", hint: "Pay when you receive your order" },
@@ -34,6 +35,13 @@ export default function CheckoutPage() {
     city: "",
     postalCode: "",
   });
+
+  useEffect(() => {
+    if (items.length > 0) {
+      trackEvent("begin_checkout", { itemCount: items.length, value: subtotal });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const shippingCost =
     SHIPPING_OPTIONS.find((s) => s.value === shippingMethod)?.cost ?? 0;
@@ -120,6 +128,13 @@ export default function CheckoutPage() {
         const payData = await payRes.json();
         if (!payRes.ok) throw new Error(payData.error || "Payment failed");
       }
+
+      trackEvent("purchase", {
+        orderId: data.order.id,
+        orderNumber: data.order.orderNumber,
+        value: total,
+        paymentMethod,
+      });
 
       setOrderNumber(data.order.orderNumber);
       clearCart();
@@ -242,7 +257,7 @@ export default function CheckoutPage() {
                 <span>PKR {(item.price * item.quantity).toLocaleString()}</span>
               </div>
             ))}
-            <div className="border-t border-[#F0D6E0] pt-4 space-y-2 text-sm">
+            <div className="space-y-2 border-t border-[#F0D6E0] pt-4 text-sm">
               <div className="flex justify-between text-[#6B5E62]">
                 <span>Subtotal</span>
                 <span>PKR {subtotal.toLocaleString()}</span>
