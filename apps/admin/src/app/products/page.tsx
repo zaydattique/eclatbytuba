@@ -23,7 +23,7 @@ export default async function ProductsPage({
 
   return (
     <div>
-      <div className="flex flex-col gap-4 sm:flex-row dec sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-[#2D2A2B]">Products</h1>
           <p className="mt-1 text-sm text-[#6B5E62]">{products.length} products</p>
