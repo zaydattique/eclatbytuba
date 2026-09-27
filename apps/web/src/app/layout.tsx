@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
@@ -24,6 +24,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     locale: "en_PK",
@@ -42,6 +43,15 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#C45C7A",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

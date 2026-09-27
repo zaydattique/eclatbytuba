@@ -1,0 +1,18 @@
+{
+  "name": "Éclat by Tuba",
+  "short_name": "Éclat",
+  "description": "Soft gloss beauty — COD Pakistan, shipping Rs 250",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF0F5",
+  "theme_color": "#C45C7A",
+  "lang": "en-PK",
+  "icons": [
+    {
+      "src": "/og.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
