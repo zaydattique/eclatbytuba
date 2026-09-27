@@ -2,34 +2,29 @@
 
 ---
 
-## 2026-09-27 — Phase 6 complete
+## 2026-09-27 — Phase 7 kickoff: SEO/AEO plan + Kiko product
 
 **What**
-- Play element: floating cherry SVG mascot + tip bubble (appears ~9s, dismiss per session)
-- Admin Settings page: payment toggles + credentials, Resend email config, play tip text, pixel ID overrides
-- `packages/db/src/settings-store.ts` + exports from `@eclat/db`
-- `GET/PUT /api/settings` — public GET strips secrets; `?admin=1` full settings
+- `docs/SEO_AEO_PLAN.md` — full plan for ranking + AI Overviews for **every** catalog product (not only Rhode/Kiko)
+- Kiko 3D Hydra Lipgloss @ **Rs 1499**, 6 shades (Clear, Pearly Pink, Golden Red, Pearly Amaryllis Red, Pearly Mauve, Brun Rose)
+- `packages/db/src/seed-kiko.ts` + catalog row
+- Shipping fact locked: **COD, all Pakistan, Rs 250**
+- `packages/config/src/site.ts` shipping + description for SEO
 
 **Why**
-- Master Plan Phase 6: increase session time with lightweight play; payments/email configurable without deploy
+- Owner: product setup + Phase 7 must include prior SEO/AEO tactics + all SKUs + national COD pricing
 
-**Asset size**
-- Cherry SVG inline ~1KB — under 30–40KB budget
-
----
-
-## 2026-09-27 — Phase 5 complete
-
-First-party analytics, session duration, GA4/Meta pixels, admin analytics UI.
+**Next**
+- Implement sitemap, schema, merge Kiko into data.ts seed, sitewide shipping Rs 250 UI copy
 
 ---
 
-## 2026-09-27 — Phase 4 complete
+## 2026-09-27 — Phase 6 complete
 
-Advanced PDP + verified reviews (orderId) + Plus Jakarta Sans only.
+Play element + admin payment/email settings.
 
 ---
 
-## 2026-09-27 — Phase 3–2 complete
+## 2026-09-27 — Phase 5–0
 
-Checkout/orders; product CRUD + media.
+Analytics, PDP/reviews, checkout, products, foundation.
