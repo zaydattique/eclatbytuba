@@ -1,6 +1,11 @@
 # Éclat by Tuba — E-commerce Platform
 
-Luxury fashion e-commerce monorepo built with Turborepo + pnpm + Next.js 14.
+Luxury beauty / soft-gloss e-commerce monorepo.  
+**Theme:** Soft Gloss Pastel (LOCKED) · **Font:** Plus Jakarta Sans ONLY (LOCKED)
+
+Single-shop Shopify-level platform · Mobile-first · High-paying GenZ + young professional women focus.
+
+> **Agents:** Read the Master Build Plan v2.0 + `docs/PROJECT_PLAN.md` + `docs/AGENTS.md` before any change. Follow phases 0–8 only. Do not reintroduce black/gold or a second font.
 
 ## Structure
 
@@ -9,22 +14,23 @@ eclat-by-tuba/
 ├── apps/
 │   ├── web/          # Storefront (port 3000) + API + payments
 │   └── admin/        # Admin dashboard (port 3001) — auth protected
-└── packages/
-    ├── auth/         # JWT session auth
-    ├── config/       # Brand tokens + site config
-    ├── db/           # Prisma + data access layer
-    ├── ui/           # Shared React components
-    ├── emails/       # Email templates
-    └── analytics/    # Tracking helpers
+├── packages/
+│   ├── auth/         # JWT session auth
+│   ├── config/       # Brand tokens + site config
+│   ├── db/           # Prisma + data access layer
+│   ├── ui/           # Shared React components
+│   ├── emails/       # Email templates
+│   └── analytics/    # Tracking helpers
+└── docs/             # PROJECT_PLAN, PHASES_STATUS, AGENTS, DESIGN_TOKENS, HISTORY
 ```
 
 ## Tech Stack
 
 - **Monorepo**: Turborepo + pnpm
-- **Frontend**: Next.js 14 (App Router) + Tailwind CSS
-- **Database**: PostgreSQL + Prisma (in-memory fallback)
+- **Frontend**: Next.js (App Router) + Tailwind CSS
+- **Database**: PostgreSQL + Prisma
 - **Auth**: JWT sessions (`@eclat/auth`)
-- **Payments**: COD · Bank Transfer · Stripe
+- **Payments**: COD · Bank Transfer · Stripe · JazzCash/EasyPaisa (configurable)
 - **Deploy**: Vercel-ready
 
 ## Getting Started
@@ -51,56 +57,37 @@ pnpm db:push
 pnpm db:seed
 ```
 
-### Optional: Stripe
+## Phase Status (see docs/PHASES_STATUS.md)
 
-```bash
-# Add keys to .env, then:
-pnpm --filter @eclat/web add stripe
-```
+| Phase | Name | Status |
+|-------|------|--------|
+| 0 | Design Token Lock + Repo Skeleton + Core Docs | ✅ |
+| 1 | Database Schema + Auth + Admin Shell | ✅ |
+| 2 | Product CRUD + Media Pipeline + Grids | 🔶 Partial |
+| 3 | Cart + Checkout + Order Management | 🔶 Partial |
+| 4 | Advanced PDP + Verified Reviews | ❌ |
+| 5 | Analytics + Pixels | ❌ |
+| 6 | Play Element + Settings (email/payments) | ❌ |
+| 7 | SEO / PWA / Security / Performance | ❌ |
+| 8 | Import 67 products + Launch | ❌ |
 
-## Phases
+Full task lists, acceptance criteria, and Definition of Done: **`docs/PROJECT_PLAN.md`**.
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| **1** | ✅ | Monorepo skeleton, design tokens |
-| **2** | ✅ | Database schema, app shells |
-| **3** | ✅ | Catalog, cart, checkout, admin CRUD |
-| **4** | ✅ | Data layer, API, orders, COD/bank |
-| **5** | ✅ | Auth, image uploads, Stripe, SEO, deploy |
+## Brand (Soft Gloss Pastel — LOCKED)
 
-## Phase 5 Features
+- **Backgrounds:** soft blush pink `#FFF0F5` – `#FFE8F0`
+- **Primary:** deep rose/berry `#C45C7A`
+- **Soft gold:** `#D4A574` (sparingly)
+- **Font:** Plus Jakarta Sans only
+- **Radii:** 20–28px + soft dual shadow
 
-### Auth
-- Admin login with JWT session cookies
-- Middleware protects all admin routes
-- Demo: `admin@eclatbytuba.com` / `eclat2026`
-- Sign out button
+See `docs/DESIGN_TOKENS.md`. Do not change without explicit approval.
 
-### Image uploads
-- `POST /api/upload` — JPEG/PNG/WebP/GIF (max 5MB)
-- Admin product form multi-image upload
-- Swap `public/uploads` for Cloudinary/S3 in production
+## Docs every agent must read
 
-### Stripe
-- `POST /api/payments/create-intent`
-- `POST /api/payments/webhook`
-- Checkout: COD · Bank Transfer · Card (Stripe)
-- Mock mode without Stripe keys
-
-### SEO
-- Dynamic sitemap.xml + robots.txt
-- Open Graph + Twitter cards
-- JSON-LD Product schema
-
-### Deploy (Vercel)
-1. Import monorepo on Vercel
-2. Two projects: `apps/web` and `apps/admin`
-3. Set env vars from `.env.example`
-4. Point `NEXT_PUBLIC_*_URL` to production domains
-
-## Brand
-
-- **Name**: Éclat by Tuba
-- **Primary**: `#1a1a1a`
-- **Accent**: `#c9a86c`
-- **Background**: `#faf9f7`
+1. Master Build Plan v2.0 (user-provided single source of truth)
+2. `docs/PROJECT_PLAN.md` — detailed phases 0–8
+3. `docs/PHASES_STATUS.md` — live status
+4. `docs/AGENTS.md` — strict rules
+5. `docs/DESIGN_TOKENS.md` — tokens
+6. `docs/HISTORY.md` — append every change
