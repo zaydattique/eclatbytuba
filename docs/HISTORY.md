@@ -2,18 +2,25 @@
 
 ---
 
-## 2026-09-27 — Phase 5 complete
+## 2026-09-27 — Phase 6 complete
 
 **What**
-- First-party analytics store + POST/GET `/api/analytics`
-- AnalyticsBeacon (session duration, engagement, page_view, UTM, device)
-- Funnel track: add_to_cart, begin_checkout, purchase
-- PixelScripts: NEXT_PUBLIC_GA_ID, NEXT_PUBLIC_META_PIXEL_ID
-- Admin `/analytics` full metric map (live + external-pending)
-- Soft Gloss dashboard polish
+- Play element: floating cherry SVG mascot + tip bubble (appears ~9s, dismiss per session)
+- Admin Settings page: payment toggles + credentials, Resend email config, play tip text, pixel ID overrides
+- `packages/db/src/settings-store.ts` + exports from `@eclat/db`
+- `GET/PUT /api/settings` — public GET strips secrets; `?admin=1` full settings
 
 **Why**
-- User metric wishlist + Master Plan avg session duration + pixels without heavy SDKs.
+- Master Plan Phase 6: increase session time with lightweight play; payments/email configurable without deploy
+
+**Asset size**
+- Cherry SVG inline ~1KB — under 30–40KB budget
+
+---
+
+## 2026-09-27 — Phase 5 complete
+
+First-party analytics, session duration, GA4/Meta pixels, admin analytics UI.
 
 ---
 
