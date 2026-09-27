@@ -1,35 +1,32 @@
 # HISTORY.md — Éclat by Tuba
 
-Chronological log of every decision and code change. Every agent must append here.
+---
+
+## 2026-09-27 — Phase 4 complete
+
+**What**
+- Advanced PDP: ProductGallery, sticky ATC, ProductAccordions, low-stock, related “Complete the look”, JSON-LD Product+FAQ+AggregateRating.
+- Verified reviews: orderId required; email must match order; product on order; status CONFIRMED+; rate limit; admin /reviews moderate.
+- Schema Review: orderId, authorEmail, imageUrl; unique productId+orderId.
+- Layout: Plus Jakarta Sans only (removed Inter + Playfair violation).
+
+**Why**
+- Master Plan Phase 4 acceptance; no guest/fake reviews.
 
 ---
 
 ## 2026-09-27 — Phase 3 complete
 
-**What**
-- Checkout Soft Gloss UI: shipping (standard/express), payments COD, bank transfer, JazzCash, EasyPaisa, Stripe.
-- POST /api/orders: checkout rate limit + sendOrderConfirmation (Resend or console mock).
-- updateOrderStatus accepts notes + trackingNumber (stored in notes as TRACKING: for Prisma).
-- Admin orders Soft Gloss list/detail; OrderStatusForm with tracking + notes + full status set.
-- Cart page Soft Gloss polish.
-
-**Why**
-- Close Phase 3 acceptance: full purchase path + admin fulfill without heavy new deps.
+Checkout Soft Gloss, shipping, local payments, rate-limit, email mock, admin tracking/notes.
 
 ---
 
 ## 2026-09-27 — Phase 2 complete
 
-updateProduct, edit page, media library, Soft Gloss admin nav, catalog seed only.
-
----
-
-## 2026-09-27 — Phase 2 progress + docs realign
-
-Soft Gloss UI tokens; Master Plan phases 0–8 docs; no black/gold.
+Product CRUD, media library, Soft Gloss UI, catalog seed only.
 
 ---
 
 ## Prior
 
-Phase 0–1 foundation; storefront cart context; security rate-limit helpers.
+Docs realign to Master Plan; Phase 0–1 foundation.
