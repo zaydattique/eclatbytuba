@@ -6,13 +6,33 @@ import { Button, Input } from "@eclat/ui";
 import { useCart } from "@/context/CartContext";
 import { trackEvent } from "@/components/AnalyticsBeacon";
 
-const PAYMENT_OPTIONS = [
-  { value: "cod", label: "Cash on Delivery", hint: "Pay when you receive your order" },
-  { value: "bank_transfer", label: "Bank Transfer", hint: "We'll send account details after order" },
-  { value: "jazzcash", label: "JazzCash", hint: "Mobile wallet — instructions after order" },
-  { value: "easypaisa", label: "EasyPaisa", hint: "Mobile wallet — instructions after order" },
-  { value: "stripe", label: "Card (Stripe)", hint: "Pay securely with credit/debit card" },
-] as const;
+const ALL_PAYMENTS = [
+  { value: "cod", key: "cod" as const, label: "Cash on Delivery", hint: "Pay when you receive your order" },
+  {
+    value: "bank_transfer",
+    key: "bank" as const,
+    label: "Bank Transfer",
+    hint: "We'll send account details after order",
+  },
+  {
+    value: "jazzcash",
+    key: "jazzcash" as const,
+    label: "JazzCash",
+    hint: "Mobile wallet — instructions after order",
+  },
+  {
+    value: "easypaisa",
+    key: "easypaisa" as const,
+    label: "EasyPaisa",
+    hint: "Mobile wallet — instructions after order",
+  },
+  {
+    value: "stripe",
+    key: "stripe" as const,
+    label: "Card (Stripe)",
+    hint: "Pay securely with credit/debit card",
+  },
+];
 
 const SHIPPING_OPTIONS = [
   { value: "standard", label: "Standard (3–5 days)", cost: 0 },
@@ -27,6 +47,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [shippingMethod, setShippingMethod] = useState("standard");
+  const [enabledKeys, setEnabledKeys] = useState<string[]>(["cod"]);
+  const [bankHint, setBankHint] = useState("");
   const [form, setForm] = useState({
     email: "",
     fullName: "",
@@ -37,11 +59,40 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((s) => {
+        const p = s?.payments || {};
+        const keys = ALL_PAYMENTS.filter((opt) => p[opt.key]?.enabled !== false || opt.key === "cod")
+          .filter((opt) => p[opt.key]?.enabled === true || (opt.key === "cod" && p.cod?.enabled !== false))
+          .map((opt) => opt.key);
+        // If nothing configured, keep COD only
+        const final =
+          keys.length > 0
+            ? keys
+            : ALL_PAYMENTS.filter((o) => p[o.key]?.enabled).map((o) => o.key);
+        const list = final.length ? final : ["cod"];
+        setEnabledKeys(list);
+        const first = ALL_PAYMENTS.find((o) => list.includes(o.key));
+        if (first) setPaymentMethod(first.value);
+        if (p.bank?.enabled && p.bank.bankName) {
+          setBankHint(`${p.bank.bankName} · ${p.bank.accountName} · ${p.bank.accountNumber}`);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (items.length > 0) {
       trackEvent("begin_checkout", { itemCount: items.length, value: subtotal });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const paymentOptions = ALL_PAYMENTS.filter((o) => enabledKeys.includes(o.key)).map((o) => ({
+    ...o,
+    hint: o.key === "bank" && bankHint ? bankHint : o.hint,
+  }));
 
   const shippingCost =
     SHIPPING_OPTIONS.find((s) => s.value === shippingMethod)?.cost ?? 0;
@@ -221,7 +272,7 @@ export default function CheckoutPage() {
           <div>
             <h3 className="mb-3 text-sm font-medium text-[#2D2A2B]">Payment Method</h3>
             <div className="space-y-2">
-              {PAYMENT_OPTIONS.map((opt) => (
+              {paymentOptions.map((opt) => (
                 <label key={opt.value} className={radioClass}>
                   <input
                     type="radio"

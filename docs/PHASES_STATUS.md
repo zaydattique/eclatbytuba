@@ -4,10 +4,20 @@
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 0–6 | Foundation → Play + Settings | ✅ |
-| 7 | SEO / AEO / PWA / Security / Performance | 🔶 Spec in PROJECT_PLAN Phase 7 only |
-| 8 | Import + Launch | ❌ |
+| 0 | Design Token Lock + Repo Skeleton + Core Docs | ✅ |
+| 1 | Database Schema + Auth + Basic Admin Shell | ✅ |
+| 2 | Product CRUD + Media Pipeline + Product Grids | ✅ |
+| 3 | Cart + Checkout + Order Management | ✅ |
+| 4 | Advanced Product Page + Verified Reviews | ✅ |
+| 5 | Analytics Dashboard + Meta/Google Pixels | ✅ |
+| 6 | Interactive Play + Email/Payment Config in Admin | ✅ |
+| 7 | SEO / AEO / PWA / Security / Performance | ❌ |
+| 8 | Import 67 Products + Content + Launch | ❌ |
 
-## Phase 7
-- All SEO/AEO detail lives in **docs/PROJECT_PLAN.md § PHASE 7** (no separate SEO plan file)
-- [ ] Code: sitemap, schema, Kiko seed merge, Rs 250 sitewide, PWA, audit
+## Phase 6 checklist
+- [x] Play element (cherry tip + Find Your Shade quiz)
+- [x] Admin Settings: payments enable/toggle + bank/Stripe/JazzCash/EasyPaisa fields
+- [x] Admin Settings: Resend email config + notification toggles
+- [x] Settings API public vs admin (secrets stripped)
+- [x] Checkout respects enabled payment methods
+- [x] Play respects admin enabled + tip text
