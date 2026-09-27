@@ -34,9 +34,10 @@ const ALL_PAYMENTS = [
   },
 ];
 
+/** Sitewide fact: standard shipping Rs 250 all Pakistan */
 const SHIPPING_OPTIONS = [
-  { value: "standard", label: "Standard (3–5 days)", cost: 0 },
-  { value: "express", label: "Express (1–2 days)", cost: 250 },
+  { value: "standard", label: "Standard (3–5 days) · All Pakistan", cost: 250 },
+  { value: "express", label: "Express (1–2 days)", cost: 350 },
 ] as const;
 
 export default function CheckoutPage() {
@@ -63,15 +64,10 @@ export default function CheckoutPage() {
       .then((r) => r.json())
       .then((s) => {
         const p = s?.payments || {};
-        const keys = ALL_PAYMENTS.filter((opt) => p[opt.key]?.enabled !== false || opt.key === "cod")
-          .filter((opt) => p[opt.key]?.enabled === true || (opt.key === "cod" && p.cod?.enabled !== false))
-          .map((opt) => opt.key);
-        // If nothing configured, keep COD only
-        const final =
-          keys.length > 0
-            ? keys
-            : ALL_PAYMENTS.filter((o) => p[o.key]?.enabled).map((o) => o.key);
-        const list = final.length ? final : ["cod"];
+        const keys = ALL_PAYMENTS.filter(
+          (opt) => p[opt.key]?.enabled === true || (opt.key === "cod" && p.cod?.enabled !== false)
+        ).map((opt) => opt.key);
+        const list = keys.length ? keys : ["cod"];
         setEnabledKeys(list);
         const first = ALL_PAYMENTS.find((o) => list.includes(o.key));
         if (first) setPaymentMethod(first.value);
@@ -95,7 +91,7 @@ export default function CheckoutPage() {
   }));
 
   const shippingCost =
-    SHIPPING_OPTIONS.find((s) => s.value === shippingMethod)?.cost ?? 0;
+    SHIPPING_OPTIONS.find((s) => s.value === shippingMethod)?.cost ?? 250;
   const total = subtotal + shippingCost;
 
   if (items.length === 0 && !placed) {
@@ -119,7 +115,7 @@ export default function CheckoutPage() {
         </p>
         <p className="mt-2 text-sm text-[#6B5E62]">
           {paymentMethod === "cod"
-            ? "We'll contact you shortly to confirm. Pay on delivery."
+            ? "We'll contact you shortly to confirm. Pay on delivery. Shipping Rs 250."
             : paymentMethod === "stripe"
               ? "Payment received (or mock). We'll process your order shortly."
               : "We'll send payment instructions shortly."}
@@ -145,6 +141,7 @@ export default function CheckoutPage() {
           phone: form.phone,
           paymentMethod,
           shippingMethod,
+          shippingCost,
           shippingAddress: {
             fullName: form.fullName,
             line1: form.address,
@@ -203,6 +200,7 @@ export default function CheckoutPage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-3xl font-semibold text-[#2D2A2B]">Checkout</h1>
+      <p className="mt-1 text-sm text-[#6B5E62]">COD available · Shipping from Rs 250 · All Pakistan</p>
 
       <form onSubmit={handleSubmit} className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-2">
         <div className="space-y-6">
@@ -260,9 +258,7 @@ export default function CheckoutPage() {
                   />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-[#2D2A2B]">{opt.label}</p>
-                    <p className="text-xs text-[#6B5E62]">
-                      {opt.cost === 0 ? "Free" : `PKR ${opt.cost}`}
-                    </p>
+                    <p className="text-xs text-[#6B5E62]">PKR {opt.cost}</p>
                   </div>
                 </label>
               ))}
@@ -315,7 +311,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-[#6B5E62]">
                 <span>Shipping</span>
-                <span>{shippingCost === 0 ? "Free" : `PKR ${shippingCost}`}</span>
+                <span>PKR {shippingCost.toLocaleString()}</span>
               </div>
               <div className="flex justify-between font-semibold text-[#2D2A2B]">
                 <span>Total</span>
