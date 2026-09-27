@@ -1,4 +1,4 @@
-// Éclat by Tuba — Database Schema (Phase 1 + 2)
+// Éclat by Tuba — Database Schema
 generator client {
   provider = "prisma-client-js"
 }
@@ -198,6 +198,7 @@ model Order {
   user            User?         @relation(fields: [userId], references: [id])
   items           OrderItem[]
   payments        Payment[]
+  reviews         Review[]
 
   @@index([userId])
   @@index([status])
@@ -243,21 +244,28 @@ model Payment {
   @@map("payments")
 }
 
+// Verified reviews only — orderId required (no guest fake reviews)
 model Review {
-  id        String   @id @default(cuid())
-  productId String
-  userId    String
-  rating    Int
-  title     String?
-  body      String?
-  isApproved Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  productId   String
+  orderId     String
+  userId      String?
+  authorEmail String
+  authorName  String?
+  rating      Int
+  title       String?
+  body        String?
+  imageUrl    String?
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  @@unique([productId, userId])
+  @@unique([productId, orderId])
+  @@index([productId, isApproved])
   @@map("reviews")
 }
 
