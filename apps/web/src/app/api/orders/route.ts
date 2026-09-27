@@ -53,9 +53,14 @@ export async function POST(req: NextRequest) {
       },
       items: body.items,
       paymentMethod: body.paymentMethod || "cod",
+      shippingCost:
+        body.shippingCost != null
+          ? Number(body.shippingCost)
+          : body.shippingMethod === "express"
+            ? 350
+            : 250,
     });
 
-    // Fire-and-forget confirmation (mock if no RESEND_API_KEY)
     try {
       await sendOrderConfirmation({
         to: body.email,
