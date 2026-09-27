@@ -1,14 +1,16 @@
 /**
  * Media pipeline helpers
  *
- * Production flow (when Cloudflare R2 / Images or Sharp is connected):
+ * Dev / current: validate mime + max size, store original under public/uploads.
+ * Production (Cloudflare Images or Sharp on worker):
  * 1. Accept upload (JPEG/PNG/WebP/GIF)
- * 2. Validate mime + max size
+ * 2. validateImageFile
  * 3. Compress → WebP + AVIF variants
- * 4. Generate responsive widths (320, 640, 960, 1280)
- * 5. Store URLs on ProductImage / Media models
+ * 4. Responsive widths IMAGE_WIDTHS
+ * 5. Persist URLs on Product.images
  *
- * Dev: validate + save original; compression deferred (no heavy Sharp dep yet).
+ * Sharp is intentionally not added as a monorepo dep (bundle/perf cost).
+ * Prefer Cloudflare Images transforms in production instead.
  */
 
 export const ALLOWED_IMAGE_TYPES = [
@@ -31,3 +33,10 @@ export function validateImageFile(file: { type: string; size: number }): string 
 }
 
 export const IMAGE_WIDTHS = [320, 640, 960, 1280, 1600] as const;
+
+/** Hint for CDN transform query strings when using Cloudflare Images. */
+export function cfImageUrl(path: string, width: number): string {
+  if (!path) return path;
+  if (path.startsWith("/uploads")) return path;
+  return path;
+}

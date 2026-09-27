@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge, Button } from "@eclat/ui";
-import { getProducts } from "@/lib/data";
+import { getAdminProducts } from "@/lib/data";
 
 export const metadata = { title: "Products" };
 
@@ -11,7 +11,7 @@ export default async function ProductsPage({
 }) {
   const sp = (await searchParams) || {};
   const q = (sp.q || "").toLowerCase().trim();
-  let products = await getProducts();
+  let products = await getAdminProducts();
   if (q) {
     products = products.filter(
       (p: any) =>
@@ -73,7 +73,12 @@ export default async function ProductsPage({
             {products.map((product: any) => (
               <tr key={product.id} className="hover:bg-[#FFF0F5]/60">
                 <td className="whitespace-nowrap px-6 py-4">
-                  <div className="font-medium text-[#2D2A2B]">{product.name}</div>
+                  <Link
+                    href={`/products/${product.id}`}
+                    className="font-medium text-[#2D2A2B] hover:text-[#C45C7A]"
+                  >
+                    {product.name}
+                  </Link>
                   <div className="text-xs text-[#6B5E62]">{product.slug}</div>
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-[#6B5E62]">
@@ -89,8 +94,12 @@ export default async function ProductsPage({
                   )}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4">
-                  <div className="flex gap-1">
-                    {product.isActive && <Badge variant="success">Active</Badge>}
+                  <div className="flex flex-wrap gap-1">
+                    {product.isActive ? (
+                      <Badge variant="success">Active</Badge>
+                    ) : (
+                      <Badge variant="outline">Inactive</Badge>
+                    )}
                     {product.isFeatured && <Badge variant="secondary">Featured</Badge>}
                   </div>
                 </td>

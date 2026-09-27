@@ -21,6 +21,8 @@ export {
   getProductBySlug,
   getProductById,
   createProduct,
+  updateProduct,
+  getAllProductImages,
   getOrders,
   getOrderById,
   createOrder,

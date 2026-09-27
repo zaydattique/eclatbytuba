@@ -15,7 +15,6 @@ function ensureMemSeed() {
   if (mem.initialized) return;
   mem.initialized = true;
 
-  // Categories aligned to beauty catalog types
   mem.categories = [
     { id: "c1", name: "Cosmetic Kits", slug: "cosmetic-kits", sortOrder: 1, isActive: true },
     { id: "c2", name: "Lipstick", slug: "lipstick", sortOrder: 2, isActive: true },
@@ -24,7 +23,6 @@ function ensureMemSeed() {
     { id: "c5", name: "Nails", slug: "nails", sortOrder: 5, isActive: true },
   ];
 
-  // Real items from docs/PRODUCTS_CATALOG.md (subset for in-memory demo)
   mem.products = [
     {
       id: "p1",
@@ -181,12 +179,18 @@ export async function getCategories() {
   return mem.categories;
 }
 
-export async function getProducts(opts?: { categorySlug?: string; featured?: boolean }) {
+export async function getProducts(opts?: {
+  categorySlug?: string;
+  featured?: boolean;
+  activeOnly?: boolean;
+}) {
+  const activeOnly = opts?.activeOnly !== false;
+
   if (useDb()) {
     const { prisma } = await import("./index");
     return prisma.product.findMany({
       where: {
-        isActive: true,
+        ...(activeOnly ? { isActive: true } : {}),
         ...(opts?.featured ? { isFeatured: true } : {}),
         ...(opts?.categorySlug ? { category: { slug: opts.categorySlug } } : {}),
       },
@@ -195,7 +199,8 @@ export async function getProducts(opts?: { categorySlug?: string; featured?: boo
     });
   }
   ensureMemSeed();
-  let list = mem.products.filter((p) => p.isActive);
+  let list = [...mem.products];
+  if (activeOnly) list = list.filter((p) => p.isActive);
   if (opts?.featured) list = list.filter((p) => p.isFeatured);
   if (opts?.categorySlug) list = list.filter((p) => p.category?.slug === opts.categorySlug);
   return list;
@@ -270,6 +275,73 @@ export async function createProduct(data: {
   };
   mem.products.push(product);
   return product;
+}
+
+export async function updateProduct(
+  id: string,
+  data: {
+    name?: string;
+    slug?: string;
+    description?: string;
+    price?: number;
+    compareAtPrice?: number | null;
+    inventory?: number;
+    categoryId?: string | null;
+    isActive?: boolean;
+    isFeatured?: boolean;
+    tags?: string[];
+    images?: string[];
+  }
+) {
+  if (useDb()) {
+    const { prisma } = await import("./index");
+    return prisma.product.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.slug !== undefined ? { slug: data.slug } : {}),
+        ...(data.description !== undefined ? { description: data.description } : {}),
+        ...(data.price !== undefined ? { price: data.price } : {}),
+        ...(data.compareAtPrice !== undefined ? { compareAtPrice: data.compareAtPrice } : {}),
+        ...(data.inventory !== undefined ? { inventory: data.inventory } : {}),
+        ...(data.categoryId !== undefined ? { categoryId: data.categoryId } : {}),
+        ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+        ...(data.isFeatured !== undefined ? { isFeatured: data.isFeatured } : {}),
+        ...(data.tags !== undefined ? { tags: data.tags } : {}),
+        ...(data.images !== undefined ? { images: data.images } : {}),
+      },
+      include: { category: true },
+    });
+  }
+  ensureMemSeed();
+  const idx = mem.products.findIndex((p) => p.id === id);
+  if (idx < 0) return null;
+  const prev = mem.products[idx];
+  const cat =
+    data.categoryId !== undefined
+      ? mem.categories.find((c) => c.id === data.categoryId) || null
+      : prev.category;
+  mem.products[idx] = {
+    ...prev,
+    ...data,
+    category: cat,
+  };
+  return mem.products[idx];
+}
+
+/** Collect unique image URLs from all products (media library). */
+export async function getAllProductImages(): Promise<
+  { url: string; productId: string; productName: string }[]
+> {
+  const products = await getProducts({ activeOnly: false });
+  const out: { url: string; productId: string; productName: string }[] = [];
+  for (const p of products) {
+    const imgs = p.images || [];
+    for (const url of imgs) {
+      if (url) out.push({ url, productId: p.id, productName: p.name });
+    }
+  }
+  return out;
 }
 
 export async function getOrders() {
@@ -400,7 +472,7 @@ export async function updateOrderStatus(id: string, status: string) {
 }
 
 export async function getDashboardStats() {
-  const products = await getProducts();
+  const products = await getProducts({ activeOnly: false });
   const orders = await getOrders();
   const revenue = orders.reduce((s: number, o: any) => s + Number(o.total), 0);
   return {

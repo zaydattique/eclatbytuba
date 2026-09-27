@@ -17,9 +17,11 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white">
-      <div className="flex h-16 items-center border-b border-gray-200 px-6">
-        <span className="text-lg font-semibold tracking-tight">Éclat Admin</span>
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-[#F0D6E0] bg-white">
+      <div className="flex h-16 items-center border-b border-[#F0D6E0] px-6">
+        <span className="text-lg font-semibold tracking-tight text-[#2D2A2B]">
+          Éclat Admin
+        </span>
       </div>
       <nav className="flex h-[calc(100vh-4rem)] flex-col justify-between p-4">
         <div className="space-y-1">
@@ -32,10 +34,10 @@ export function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`block rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                className={`block rounded-[12px] px-3 py-2 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
+                    ? "bg-[#C45C7A] text-white"
+                    : "text-[#2D2A2B] hover:bg-[#FFF0F5]"
                 }`}
               >
                 {item.name}
@@ -45,7 +47,7 @@ export function Sidebar() {
         </div>
         <button
           onClick={handleLogout}
-          className="rounded-md px-3 py-2 text-left text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+          className="rounded-[12px] px-3 py-2 text-left text-sm font-medium text-[#6B5E62] hover:bg-[#FFF0F5] hover:text-[#2D2A2B]"
         >
           Sign out
         </button>
