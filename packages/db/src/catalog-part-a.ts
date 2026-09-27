@@ -1,1 +1,2 @@
-export const catalogProductsA = [] as any[]; // placeholder — full file pushed next
+/** @deprecated use catalog-chunk-* */
+export const catalogProductsA: any[] = [];
