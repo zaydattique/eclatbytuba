@@ -1,314 +1,239 @@
 # Éclat by Tuba — Extremely Detailed Project Plan
 
-**Version:** 2.0 (Master Build Plan aligned)  
-**Date locked:** 26 Sep 2026  
-**Theme:** Soft Gloss Pastel (LOCKED — do not change)  
-**Font:** Plus Jakarta Sans ONLY (LOCKED — no other families)  
-**Source of truth:** Master Build Plan v2.0 + this file  
-**Product data:** 67 products only — never invent (see PRODUCTS_CATALOG.md / catalog JSON)
+**Version:** 2.1  
+**Date locked:** 26–27 Sep 2026  
+**Theme:** Soft Gloss Pastel (LOCKED)  
+**Font:** Plus Jakarta Sans ONLY (LOCKED)  
+**Source of truth for phases:** **this file only**  
+**Product data:** catalog + approved Kiko add — never invent  
+**Ops:** All Pakistan · COD · **Shipping Rs 250**
 
-Any agent reading this must follow these phases in order. Do not invent new phases. Do not skip acceptance criteria.
+Any agent must follow these phases in order. Do not invent new phases.
 
 ---
 
 ## GLOBAL RULES (apply to every phase)
 
-- **One font only:** Plus Jakarta Sans (weights 400/500/600/700). No Inter, no system-ui as primary, no second family.
-- **Theme locked:** Soft Gloss Pastel tokens from DESIGN_TOKENS.md only. Backgrounds soft blush (#FFF0F5–#FFE8F0). Primary deep rose/berry (#C45C7A). Soft gold sparingly. Never pure white, grey, black, or dark luxury.
-- **Mobile-first:** Target FCP < 1.2s on mid-range Pakistani mobile. Admin must be usable on phone (“owner in Lahore traffic”).
-- **Surgical changes only:** Prefer editing existing files. Do not create new style/logic files if functionality fits an existing one. Do not overwrite large files wholesale.
-- **Log everything:** Every change → HISTORY.md (date, what, why).
-- **No invented products:** Use the 67-product catalog only.
-- **Reviews:** Must be verified via real orderId. No guest/fake reviews.
-- **Libraries:** No new heavy libs without justification written in HISTORY.md.
-- **Performance sacred:** Justify every addition against load time.
+- **One font only:** Plus Jakarta Sans (400/500/600/700).
+- **Theme locked:** Soft Gloss Pastel — DESIGN_TOKENS.md only.
+- **Mobile-first:** FCP target < 1.2s mid-range PK mobile; admin usable on phone.
+- **Surgical changes only:** Edit existing files. Do not create new style/logic files if fix fits existing code.
+- **No new plan/doc sprawl:** Do **not** create extra markdown plans (`SEO_AEO_PLAN.md`, phase note files, etc.). Put **all phase detail inside this PROJECT_PLAN.md** under the relevant phase. Allowed fixed docs only: PROJECT_PLAN.md, PHASES_STATUS.md, HISTORY.md, AGENTS.md, DESIGN_TOKENS.md, PRODUCTS_CATALOG.md.
+- **Log everything:** Every change → HISTORY.md.
+- **No invented products** beyond catalog + owner-approved adds (Kiko).
+- **Reviews:** orderId required (verified buyers only).
+- **Libraries:** No heavy new libs without HISTORY justification.
+- **Performance sacred.**
 
 ---
 
 ## PHASE 0 — Design Token Lock + Repo Skeleton + Core Docs
 
-**Goal:** Lock visual system and create the monorepo skeleton so every future agent starts from the same foundation.
+**Goal:** Lock visual system + monorepo foundation.
 
 ### Tasks
-1. Create / confirm DESIGN_TOKENS.md with exact hex, radii, shadows, spacing, font weights (Soft Gloss Pastel).
-2. Create / confirm AGENTS.md with the 13 strict rules.
-3. Create / confirm HISTORY.md and seed it with initial entries.
-4. Create monorepo: Turborepo + pnpm, `apps/web`, `apps/admin`, packages (`db`, `ui`, `config`, `auth`, `emails`, `analytics`).
-5. Root package.json, turbo.json, pnpm-workspace.yaml, tsconfig, .env.example.
-6. Single font setup: Plus Jakarta Sans self-hosted or single fast source only.
-7. Base Tailwind / CSS variables wired to DESIGN_TOKENS.
-8. Soft Gloss Pastel applied to both storefront and admin shells (no black/gold).
+1. DESIGN_TOKENS.md (Soft Gloss Pastel).
+2. AGENTS.md strict rules.
+3. HISTORY.md seeded.
+4. Turborepo + pnpm: apps/web, apps/admin, packages.
+5. Root configs, .env.example.
+6. Plus Jakarta Sans only.
+7. Tailwind/CSS variables from tokens.
+8. Soft Gloss on storefront + admin shells.
 
-### Acceptance Criteria
-- [ ] DESIGN_TOKENS.md exists and matches Master Plan colors/radii/shadows.
-- [ ] AGENTS.md and HISTORY.md exist and are referenced in README.
-- [ ] `pnpm install && pnpm dev` starts both apps without error.
-- [ ] No second font family anywhere in the codebase.
-- [ ] Backgrounds are soft blush pink, not white/grey/black.
-
-### Definition of Done
-Phase 0 complete only when tokens are locked, docs exist, monorepo runs, and Soft Gloss Pastel is visibly applied on both apps.
-
-**Status note:** Skeleton and tokens largely exist; any remaining black/gold or wrong font must be purged before calling Phase 0 fully done.
+### Acceptance / DoD
+Tokens locked, monorepo runs, Soft Gloss visible, no second font.
 
 ---
 
-## PHASE 1 — Database Schema (Prisma) + Auth + Basic Admin Shell (Mobile)
-
-**Goal:** Solid data model, secure admin login, mobile-usable admin shell.
+## PHASE 1 — DB Schema + Auth + Admin Shell
 
 ### Tasks
-1. Full Prisma schema: User, Product, Variant, Image, Collection, Order, OrderItem, Review (with required orderId FK), Discount, ShippingMethod, Media, Setting, AnalyticsEvent.
-2. JWT session auth package (`@eclat/auth`): login, logout, httpOnly cookie, middleware protection for all admin routes.
-3. Admin shell (mobile-first):
-   - Top bar + bottom tabs or collapsible sidebar usable on phone
-   - Login page
-   - Dashboard placeholder cards
-   - PWA manifest basics
-4. Demo admin credentials from .env (ADMIN_EMAIL / ADMIN_PASSWORD).
-5. Security headers + basic rate limiting on auth endpoints.
-6. Seed script for admin user only (no fake products).
+Prisma full schema (Review requires orderId). JWT admin auth. Mobile admin shell. Rate limit auth. Seed admin only.
 
-### Acceptance Criteria
-- [ ] `pnpm db:generate && pnpm db:push` succeeds.
-- [ ] Admin login works; unauthenticated users redirected to /login.
-- [ ] Session cookie is httpOnly; logout clears it.
-- [ ] Admin layout is usable on a 375px-wide viewport.
-- [ ] Review model requires orderId (verified buyers only).
-- [ ] No product seed data invented — empty catalog is fine.
-
-### Definition of Done
-Auth protects every admin route, schema is complete, admin shell is mobile-first, Soft Gloss Pastel applied to admin UI.
+### DoD
+Auth on all admin routes; mobile shell; Soft Gloss on admin.
 
 ---
 
-## PHASE 2 — Product CRUD + Media Pipeline (Auto Compression) + Product Grids
-
-**Goal:** Full product management in admin + storefront product grids using Soft Gloss Pastel cards.
+## PHASE 2 — Product CRUD + Media + Grids
 
 ### Tasks
-1. Admin Products list: search, filters (availability, category), card/table toggle, bulk actions.
-2. Rich product create/edit form:
-   - Title, handle, description (rich text or markdown)
-   - Pricing (price, compare-at), inventory, variants (shade swatches if applicable)
-   - SEO fields (title, description, slug)
-   - Drag-drop multi-image upload
-3. Media pipeline:
-   - Accept JPEG/PNG/WebP/GIF (max size enforced)
-   - Auto-compress → WebP/AVIF + responsive sizes
-   - Blur placeholders
-   - Store under controlled path (or R2 later)
-4. Media library view in admin.
-5. Storefront product grids:
-   - Mobile-first ProductCard: large image, soft 20–28px radius, dual soft shadow, price + compare-at, review stars, quick-add
-   - Skeleton loaders
-   - Filters (availability, price, category) fast on mobile
-   - Infinite scroll or smart pagination
-6. Collection pages shell.
+Admin product CRUD, media compress, storefront Soft Gloss cards/grids, collections shell.
 
-### Acceptance Criteria
-- [ ] Admin can create/edit/delete products with images.
-- [ ] Uploaded images are compressed and served as WebP/AVIF where possible.
-- [ ] ProductCard matches Soft Gloss Pastel (blush bg context, rose primary, soft gold sparingly).
-- [ ] Grids are mobile-first; filters work without jank.
-- [ ] No second font; no black/gold theme regression.
-
-### Definition of Done
-Admin product CRUD + media pipeline working; storefront grids use correct Soft Gloss Pastel cards and are performant on mobile.
+### DoD
+CRUD + media + performant mobile grids.
 
 ---
 
-## PHASE 3 — Cart + Checkout (COD + Stripe + Local Methods) + Order Management
-
-**Goal:** Complete purchase path and order handling.
+## PHASE 3 — Cart + Checkout + Orders
 
 ### Tasks
-1. Cart:
-   - CartProvider (localStorage or server)
-   - Cart drawer + /cart page
-   - Quantity update, remove, subtotal
-2. Checkout:
-   - Contact + Pakistan address fields
-   - Shipping method selection
-   - Payment methods: COD, Bank Transfer, Stripe (card), JazzCash/EasyPaisa (configurable)
-   - Order creation on success
-3. Admin Orders:
-   - Orders list (status, date, customer, total)
-   - Rich order detail: line items, fulfill, tracking number, refund/notes, status transitions
-4. Email notifications (order confirmation) via Resend when configured; graceful mock otherwise.
-5. Rate limiting on checkout endpoints.
+Cart, checkout (COD + Stripe + local methods), admin orders, email mock/Resend, rate limit checkout. Shipping cost **Rs 250** sitewide fact.
 
-### Acceptance Criteria
-- [ ] Full flow: add to cart → checkout → order created for COD and Stripe (mock mode OK without keys).
-- [ ] Admin can view and update order status, add tracking.
-- [ ] Payment methods are Admin-configurable (Settings later in Phase 6 can refine).
-- [ ] No heavy new libraries without HISTORY justification.
-
-### Definition of Done
-Customer can place an order; admin can manage it end-to-end. Soft Gloss Pastel preserved on checkout UI.
+### DoD
+Order path works; admin can fulfill.
 
 ---
 
-## PHASE 4 — Advanced Product Page + Verified Reviews System
-
-**Goal:** High-converting PDP + authentic reviews only.
+## PHASE 4 — Advanced PDP + Verified Reviews
 
 ### Tasks
-1. Advanced Product Detail Page (PDP):
-   - Image gallery: zoom + swipe (mobile)
-   - Variant selectors (shade swatches)
-   - Sticky add-to-cart on mobile
-   - Accordion/tabs: Description, How to use, Ingredients, Shipping & Returns
-   - Complete the look / frequently bought together
-   - Real-time low-stock indicator
-   - Structured data: Product + Review + FAQ JSON-LD
-2. Verified Reviews system:
-   - Only customers with a real order (orderId FK) can submit
-   - Flow: after delivery → review link (secure token or logged-in) → star + text + optional photo
-   - Admin moderation (approve / hide)
-   - Display: average rating, count, photo reviews first, “Verified Buyer” badge
-   - No guest reviews; enforce orderId
-3. Review submission rate limit.
+Full PDP, verified reviews only, JSON-LD start.
 
-### Acceptance Criteria
-- [ ] PDP is fully interactive on mobile (swipe gallery, sticky ATC).
-- [ ] Review cannot be created without valid orderId.
-- [ ] Admin can moderate reviews.
-- [ ] JSON-LD present and valid.
-- [ ] Soft Gloss Pastel + Plus Jakarta Sans only.
-
-### Definition of Done
-PDP is advanced and conversion-oriented; reviews are verified against real orders only.
+### DoD
+PDP conversion-ready; reviews need orderId.
 
 ---
 
-## PHASE 5 — Analytics Dashboard (incl. Avg Session Duration) + Meta/Google Pixels
-
-**Goal:** Shopify-level analytics + tracking pixels, all configurable.
+## PHASE 5 — Analytics + Pixels
 
 ### Tasks
-1. Admin Analytics dashboard:
-   - Total sales / revenue
-   - Orders count + average order value (AOV)
-   - Conversion rate
-   - **Average session duration** (explicit requirement)
-   - Sessions / visitors, bounce rate
-   - Top products by revenue and by units
-   - Traffic sources (UTM + referrer)
-   - Device split (expect high mobile)
-   - Sales by day/week/month with charts
-   - Date range picker, CSV export
-   - Mobile-optimized view
-2. Pixels & tracking:
-   - Meta Pixel + Conversions API (CAPI)
-   - Google Analytics 4 + Google Ads conversion tracking
-   - Events: page_view, view_item, add_to_cart, begin_checkout, purchase, search, view_item_list
-   - Configurable from Admin (paste IDs, toggle events)
-3. Lightweight chart library only if needed (justify in HISTORY.md).
+Admin analytics incl. **avg session duration**, Meta/GA4 pixels, funnel events.
 
-### Acceptance Criteria
-- [ ] All core metrics listed above are visible and correct.
-- [ ] Avg session duration is tracked and shown.
-- [ ] Pixels fire the required events (or are cleanly mocked when IDs empty).
-- [ ] Dashboard is usable on phone.
-
-### Definition of Done
-Owner can open admin on phone and see sales, conversion, session time, and top products; pixels are ready for production IDs.
+### DoD
+Owner sees metrics on phone; pixels ready.
 
 ---
 
-## PHASE 6 — Interactive Play Element + Email Config + Payment Config in Admin
-
-**Goal:** Increase session duration with a lightweight play element; make payments & email fully Admin-configurable.
+## PHASE 6 — Play Element + Settings
 
 ### Tasks
-1. Interactive “Play” element (choose one or small combo):
-   - Floating mascot (cute cherry / gloss-drop) that appears after 8–10s or on scroll
-   - Can wave, react to cart, show tip (“Try the Rhode set — bestseller in Lahore”), or open mini shade-finder quiz
-   - Alternative: “Which shade is yours?” quiz on homepage/PDP
-   - Must be < 30–40 KB (SVG or small Lottie). No heavy canvas.
-2. Admin Settings:
-   - Payment methods toggle + credentials (Stripe, JazzCash, EasyPaisa, COD, Bank Transfer)
-   - Email (Resend) API key + from address + template toggles
-3. Graceful degradation when keys missing (mock mode).
+Cherry SVG play element; admin payments + email + play config.
 
-### Acceptance Criteria
-- [ ] Play element loads fast, stays on-brand, does not hurt FCP.
-- [ ] Session-duration impact is measurable (or at least not negative).
-- [ ] Payments and email are configurable from Admin without code deploy.
-- [ ] HISTORY.md notes any new asset size.
-
-### Definition of Done
-Play element is live and lightweight; owner can configure payments and email from phone.
+### DoD
+Play live lightweight; settings on phone.
 
 ---
 
-## PHASE 7 — SEO / AEO / PWA / Security / Performance Audit
+## PHASE 7 — SEO / AEO / PWA / Security / Performance
 
-**Goal:** Launch-ready polish, security, and performance.
+**Goal:** Rank for **all catalog products** (not only Rhode/Kiko) in organic results **and** AI Overviews where possible; PWA + security + speed.  
+**Honest:** “#1 for every query” is not guaranteed — maximise probability with the checklist below.
 
-### Tasks
-1. SEO/AEO:
-   - Dynamic sitemap.xml + robots.txt
-   - Open Graph + Twitter cards
-   - Product / Review / FAQ JSON-LD (already started in Phase 4 — complete)
-2. PWA:
-   - Installable (manifest + service worker basics)
-   - Optional push for new orders (owner notification)
-3. Security:
-   - Cloudflare WAF / bot management notes
-   - CSP, rate limits, secure headers already applied — audit and tighten
-   - Sensitive keys never exposed to client
-4. Performance audit:
-   - Measure FCP / LCP / CLS on mid-range mobile
-   - Fix regressions; stay under 1.2s FCP target
-   - Image pipeline, font, code-splitting confirmed
+### 7.1 Business facts (every page)
+- All Pakistan delivery  
+- COD  
+- Shipping **Rs 250**  
+- Verified reviews only  
 
-### Acceptance Criteria
-- [ ] Lighthouse / Web Vitals pass reasonable mobile thresholds.
-- [ ] PWA installable on Android/iOS browser.
-- [ ] No critical security headers missing.
-- [ ] Soft Gloss Pastel + single font still enforced.
+### 7.2 Product: Kiko 3D Hydra Lipgloss (owner add)
+| Field | Value |
+|-------|--------|
+| Name | Kiko 3D Hydra Lipgloss |
+| Slug | `kiko-3d-hydra-lipgloss` |
+| Price | **1499** PKR (compare 1999) |
+| Shades (6) | 01 Clear, 05 Pearly Pink, 11 Golden Red, 12 Pearly Amaryllis Red, 17 Pearly Mauve, 21 Brun Rose |
+| SEO title | Kiko 3D Hydra Lipgloss Pakistan \| 6 Shades \| Rs 1499 \| COD |
 
-### Definition of Done
-Site is performant, installable, and hardened; SEO/AEO basics complete.
+Wire into seed (`seed-kiko.ts` → `data.ts`). PDP: shade table, FAQ, schema, COD Rs 250.
+
+### 7.3 SEO kit — every product
+1. Unique title `{Product} Pakistan | Price | COD`  
+2. Unique meta 150–160 chars + COD Rs 250  
+3. Unique H1  
+4. 400–800 words original description  
+5. FAQ 5–8 → FAQPage schema  
+6. Product + Offer schema (PKR)  
+7. Review schema only if real ratings  
+8. BreadcrumbList  
+9. Alt text with product/shade  
+10. Internal links (collection + 2 related)  
+11. WebP LCP image  
+12. Canonical URL  
+
+**Priority:** P0 Rhode peptide, Kiko, Everyday Glam Kit → P1 lip sets/gloss → P2 kits/nails → P3 under 1000/2000 PKR long-tails.
+
+### 7.4 Keywords (pattern per SKU)
+`{product} pakistan` · price · COD · lahore · original · `{category} under {price}`  
+Hero: rhode lip peptide pakistan, kiko 3d hydra / kiko lipgloss pakistan, lip sets, glam kit, press-on nails, etc.
+
+### 7.5 AEO (AI Overview)
+Answer-first first ~40 words; one-sentence FAQ leads; definition boxes; comparison tables; Last updated; entity name consistency; Organization clarity; Urdu+EN FAQ where demand; no thin AI spam; HowTo/ItemList schema where fit; HTML text not image-only copy; align FAQs to real PAA-style queries.
+
+### 7.6 Technical (code tasks)
+- Dynamic sitemap.xml + robots.txt  
+- OG + Twitter per product  
+- JSON-LD Product/Offer/FAQ/Breadcrumb/ItemList  
+- noindex cart/checkout/account  
+- Canonicals; 301 old Shopify URLs if any  
+- CWV: LCP/CLS; preload hero only  
+- PWA manifest (+ light SW optional)  
+- Security headers/CSP/rate-limit audit; secrets never client-side  
+- GSC submit sitemap  
+
+### 7.7 Content pillars (min)
+1. Rhode Lip Peptide Pakistan (price, COD, authenticity)  
+2. Kiko 3D Hydra Pakistan (6 shades)  
+3. Lip sets under 2000 PKR  
+4. Everyday glam kit contents  
+5. Imported makeup COD Pakistan / shipping Rs 250  
+
+### 7.8 Off-page / traffic (execute over time)
+GBP if applicable; Pinterest/TikTok exact names; micro-influencers disclose; PK blog outreach; Shorts + transcripts; email restock; digital PR; broken-link reclaim; no doorway city spam.
+
+### 7.9 E-E-A-T / Pakistan
+Real About + contact; policies linked; verified reviews with shade names; footer trust: **COD · Rs 250 · all Pakistan**; honest original/imported claims only.
+
+### 7.10 Measurement
+GSC by product query; CTR title tests; monthly AI Overview check sheet; expand FAQ from queries; HISTORY log SEO changes.
+
+### 7.11 Extended tactic backlog (batch 2 — agents must use)
+
+**AEO 1–25:** answer-first PDP; short FAQ leads; PAA-style FAQs; HowTo schema; ItemList hubs; entity spelling; brand+product+PK links; TL;DR; tables; no stuffing; original photos; video transcripts; Updated date; author line; only verifiable facts; topic clusters; Q&A only if substantial; speakable bullets; define jargon once; no doorway pages; one price canonical per hero; shipping structured data if possible; HTML-visible copy; fast HTML; match Overview-query phrasing.
+
+**Technical 26–45:** self-canonicals; noindex private flows; clean pagination; fix redirects/mixed content; 301 legacy; param canonical; HSTS; preload LCP only; fetchpriority hero; lazy below-fold; small critical CSS; async pixels; CLS stability; useful 404; sitemap split later; image sitemap P0; hreflang only if real; SSR/static PDP HTML; weekly GSC coverage; fix thin crawled-not-indexed.
+
+**On-page 46–70:** ~60 char titles; related H1; secondary H2s; SEO filenames; good alts; 1+2 keywords max; one careful brand outbound; 3–5 internal links/guide; cornerstone hubs; honest stock; owned comparisons; who-it’s-for; care sections; unique bundles; seasonal yearly; Urdu FAQ; glossary; WhatsApp→FAQ; no thin manufacturer paste; completeness > wordcount; TOC; no CLS from TOC; linkable charts; price-check dates; no duplicate thin SKUs.
+
+**Trust 71–82:** real About; contact; policies; verified reviews; shade names in reviews; honest returns; proof for “original”; human presence; NAP if GBP; ATC trust copy; no fake timers; disclose affiliates.
+
+**Pakistan 83–92:** Rs 250 footer strip; truthful city FAQs only; local pay methods; PKR schema; GSC Urdu queries; value-first communities; MUA lookbooks; real local mentions; courier page if true; real dispatch cutoffs.
+
+**Off-page 93–110:** PR data stories; journalist requests; broken links; unlinked mentions; podcasts; Pinterest; no wiki spam; embeddable swatches; student discount page; non-competing cross-links; annual trends asset; Reel transcripts; helpful forums; Quora; live replay pages; courier features; tracked creators; reclaim post-migration mentions.
+
+**Measure 111–120:** weekly GSC product filter; rank P0; low CTR → rewrite; snippet tests; bounce→answer+speed; Overview win/loss sheet; quarterly FAQ expand; prune thin fails; HISTORY SEO logs; re-crawl after PDP upgrades.
+
+### 7.12 This-week code priority
+1. Answer-first + FAQ schema P0 PDPs  
+2. Sitewide COD + Rs 250 copy  
+3. Sitemap + Product JSON-LD  
+4. Merge Kiko into seed + variants  
+5. Rhode/Kiko pillar pages or drafts  
+6. GSC when domain live  
+
+### Phase 7 Acceptance Criteria
+- [ ] Kiko live @ 1499 with 6 shades in data layer  
+- [ ] Shipping Rs 250 + COD + all Pakistan consistent in UI  
+- [ ] sitemap.xml + robots.txt  
+- [ ] Product (+ FAQ on P0) JSON-LD  
+- [ ] SEO title/description used in metadata  
+- [ ] PWA manifest basics  
+- [ ] Security/performance audit notes in HISTORY  
+- [ ] Soft Gloss + single font still enforced  
+- [ ] No extra SEO plan files (all detail stays in this Phase 7 section)  
+
+### Phase 7 Definition of Done
+Technical SEO live; AEO-oriented PDP/FAQ/schema on priority SKUs; Kiko + shipping facts; PWA/security/perf acceptable; all tactics tracked only via this Phase 7 section + HISTORY.
 
 ---
 
-## PHASE 8 — Import 67 Products + Content + Launch Checklist
+## PHASE 8 — Import 67 Products + Launch
 
-**Goal:** Real catalog live + soft launch.
+Import catalog (+ Kiko), collections, final settings, E2E COD test, launch checklist (theme, verified reviews, analytics, play, mobile admin, HISTORY).
 
-### Tasks
-1. Import all 67 products from the official catalog JSON (images, prices, handles, descriptions).
-2. Create collections and assign products.
-3. Final settings (shipping rates, policies, contact).
-4. End-to-end test: browse → cart → COD order → admin fulfill.
-5. Soft-launch checklist:
-   - [ ] Soft Gloss Pastel + Plus Jakarta Sans only
-   - [ ] No invented products
-   - [ ] Reviews verified only
-   - [ ] Analytics + pixels ready
-   - [ ] Play element live
-   - [ ] Admin usable on mobile
-   - [ ] HISTORY.md up to date
-
-### Acceptance Criteria
-- [ ] All 67 products visible and purchasable.
-- [ ] Full COD path works in production-like env.
-- [ ] Owner can manage everything from phone.
-
-### Definition of Done
-Catalog imported, launch checklist signed off, site ready for real traffic.
+### DoD
+Full catalog purchasable; owner manages from phone.
 
 ---
 
 ## How agents must use this file
 
-1. Read Master Build Plan + this PROJECT_PLAN.md before any code change.
-2. Work only on the current incomplete phase (see PHASES_STATUS.md).
-3. When a task is finished, update PHASES_STATUS.md and append to HISTORY.md.
-4. Never change theme colors, radii, or add a second font.
-5. Prefer surgical edits to existing files.
+1. Read **this PROJECT_PLAN.md** before code.  
+2. Work only current incomplete phase (PHASES_STATUS.md).  
+3. Update PHASES_STATUS + HISTORY when done.  
+4. Never change theme/font.  
+5. Surgical edits.  
+6. **Never add parallel plan markdown files** — extend the phase section here.
 
-**Soft Gloss Pastel + Plus Jakarta Sans + Verified Reviews + Avg Session Time + Play Element + Strict Agent Rules = the only path forward.**
+**Soft Gloss Pastel + Plus Jakarta Sans + Verified Reviews + Avg Session + Play + SEO/AEO in Phase 7 only = path forward.**
