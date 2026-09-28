@@ -112,6 +112,21 @@ export function Footer() {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/privacy" className="hover:text-[#C45C7A]">
+                  Privacy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-[#C45C7A]">
+                  Terms
+                </Link>
+              </li>
+              <li>
+                <Link href="/site-map" className="hover:text-[#C45C7A]">
+                  Sitemap
+                </Link>
+              </li>
               <li>hello@eclatbytuba.com</li>
             </ul>
           </div>

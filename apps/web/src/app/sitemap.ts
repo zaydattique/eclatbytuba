@@ -7,42 +7,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: base, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
-    {
-      url: `${base}/products`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.95,
-    },
-    {
-      url: `${base}/about`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${base}/shipping`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/returns`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/contact`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    {
-      url: `${base}/guides`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
+    { url: `${base}/products`, lastModified: new Date(), changeFrequency: "daily", priority: 0.95 },
+    { url: `${base}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/shipping`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/returns`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/terms`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${base}/site-map`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.4 },
+    { url: `${base}/guides`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     {
       url: `${base}/guides/rhode-lip-peptide-pakistan`,
       lastModified: new Date(),

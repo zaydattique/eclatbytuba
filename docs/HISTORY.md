@@ -2,34 +2,31 @@
 
 ---
 
-## 2026-09-28 — SEO/AEO hard upgrade
+## 2026-09-28 — SEO 100 checklist: max code pass
 
 **What**
-- `lib/seo.ts`: unique titles, 150–160 metas, answer-first, long-form PDP copy, product-specific FAQs
-- PDP: visible FAQ + FAQPage schema, Breadcrumb with collections, richer Product/Offer JSON-LD
-- `/collections/[slug]` indexable category pages + ItemList schema
-- Trust: `/about`, `/shipping`, `/returns`, `/contact`
-- Pillars: `/guides/*` (Rhode, Kiko, under 2000, glam kit)
-- Sitemap: products, collections, guides, trust pages
-- Footer internal links; siteConfig default URL production-oriented
+- Image sitemap, security headers, en-PK, Organization schema
+- Privacy, terms, HTML sitemap, 404 recovery
+- Gallery alts + fetchPriority, HowTo helper, collection intros
+- `docs/SEO_100_CHECKLIST.md` marks ✅ / 🔶 / ❌ for all 100 items
 
 **Why**
-- Prior SEO was technical-only; content/AEO were thin templates
+- User asked to execute all 100; code-side done; owner-side listed
 
 ---
 
-## 2026-09-28 — Launch polish: Pakistan payments
+## 2026-09-28 — SEO/AEO hard upgrade
 
-COD + bank + JazzCash + EasyPaisa defaults; customGateway admin slot; Stripe placeholder only.
+PDP engine, collections, guides, trust pages, sitemap, footer links.
 
 ---
 
-## 2026-09-28 — Catalog chunks (68 products)
+## 2026-09-28 — Pakistan payments polish
 
-Full Shopify catalog + Kiko in mem seed.
+COD/bank/JazzCash/EasyPaisa + customGateway; Stripe placeholder.
 
 ---
 
 ## Prior
 
-Phases 0–8 foundation.
+Phases 0–8 + catalog 68.
