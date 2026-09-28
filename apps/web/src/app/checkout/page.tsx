@@ -7,7 +7,12 @@ import { useCart } from "@/context/CartContext";
 import { trackEvent } from "@/components/AnalyticsBeacon";
 
 const ALL_PAYMENTS = [
-  { value: "cod", key: "cod" as const, label: "Cash on Delivery", hint: "Pay when you receive your order" },
+  {
+    value: "cod",
+    key: "cod" as const,
+    label: "Cash on Delivery",
+    hint: "Pay when you receive your order",
+  },
   {
     value: "bank_transfer",
     key: "bank" as const,
@@ -18,19 +23,19 @@ const ALL_PAYMENTS = [
     value: "jazzcash",
     key: "jazzcash" as const,
     label: "JazzCash",
-    hint: "Mobile wallet — instructions after order",
+    hint: "Mobile wallet — payment instructions after order",
   },
   {
     value: "easypaisa",
     key: "easypaisa" as const,
     label: "EasyPaisa",
-    hint: "Mobile wallet — instructions after order",
+    hint: "Mobile wallet — payment instructions after order",
   },
   {
-    value: "stripe",
-    key: "stripe" as const,
-    label: "Card (Stripe)",
-    hint: "Pay securely with credit/debit card",
+    value: "custom_gateway",
+    key: "customGateway" as const,
+    label: "Online payment",
+    hint: "Pay via our Pakistan payment partner",
   },
 ];
 
@@ -39,6 +44,25 @@ const SHIPPING_OPTIONS = [
   { value: "standard", label: "Standard (3–5 days) · All Pakistan", cost: 250 },
   { value: "express", label: "Express (1–2 days)", cost: 350 },
 ] as const;
+
+function thankYouMessage(method: string, gatewayName?: string) {
+  switch (method) {
+    case "cod":
+      return "We'll contact you shortly to confirm. Pay on delivery. Shipping Rs 250.";
+    case "bank_transfer":
+      return "We'll WhatsApp/email bank details shortly. Order ships after payment confirmation.";
+    case "jazzcash":
+      return "We'll send JazzCash payment instructions shortly. Order ships after payment confirmation.";
+    case "easypaisa":
+      return "We'll send EasyPaisa payment instructions shortly. Order ships after payment confirmation.";
+    case "custom_gateway":
+      return gatewayName
+        ? `Complete payment via ${gatewayName}. We'll confirm once payment is received.`
+        : "Complete payment via our online gateway. We'll confirm once payment is received.";
+    default:
+      return "We'll send payment instructions shortly.";
+  }
+}
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart();
@@ -50,6 +74,10 @@ export default function CheckoutPage() {
   const [shippingMethod, setShippingMethod] = useState("standard");
   const [enabledKeys, setEnabledKeys] = useState<string[]>(["cod"]);
   const [bankHint, setBankHint] = useState("");
+  const [gatewayLabel, setGatewayLabel] = useState("Online payment");
+  const [gatewayHint, setGatewayHint] = useState(
+    "Pay via our Pakistan payment partner"
+  );
   const [form, setForm] = useState({
     email: "",
     fullName: "",
@@ -65,14 +93,25 @@ export default function CheckoutPage() {
       .then((s) => {
         const p = s?.payments || {};
         const keys = ALL_PAYMENTS.filter(
-          (opt) => p[opt.key]?.enabled === true || (opt.key === "cod" && p.cod?.enabled !== false)
+          (opt) =>
+            p[opt.key]?.enabled === true ||
+            (opt.key === "cod" && p.cod?.enabled !== false)
         ).map((opt) => opt.key);
         const list = keys.length ? keys : ["cod"];
         setEnabledKeys(list);
         const first = ALL_PAYMENTS.find((o) => list.includes(o.key));
         if (first) setPaymentMethod(first.value);
         if (p.bank?.enabled && p.bank.bankName) {
-          setBankHint(`${p.bank.bankName} · ${p.bank.accountName} · ${p.bank.accountNumber}`);
+          setBankHint(
+            `${p.bank.bankName} · ${p.bank.accountName} · ${p.bank.accountNumber}`
+          );
+        }
+        if (p.customGateway?.enabled) {
+          setGatewayLabel(p.customGateway.providerName || "Online payment");
+          setGatewayHint(
+            p.customGateway.instructions ||
+              "Pay via our Pakistan payment partner"
+          );
         }
       })
       .catch(() => {});
@@ -85,10 +124,14 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const paymentOptions = ALL_PAYMENTS.filter((o) => enabledKeys.includes(o.key)).map((o) => ({
-    ...o,
-    hint: o.key === "bank" && bankHint ? bankHint : o.hint,
-  }));
+  const paymentOptions = ALL_PAYMENTS.filter((o) =>
+    enabledKeys.includes(o.key)
+  ).map((o) => {
+    if (o.key === "bank" && bankHint) return { ...o, hint: bankHint };
+    if (o.key === "customGateway")
+      return { ...o, label: gatewayLabel, hint: gatewayHint };
+    return o;
+  });
 
   const shippingCost =
     SHIPPING_OPTIONS.find((s) => s.value === shippingMethod)?.cost ?? 250;
@@ -111,14 +154,12 @@ export default function CheckoutPage() {
       <main className="mx-auto max-w-3xl px-6 py-20 text-center">
         <h1 className="text-3xl font-semibold text-[#2D2A2B]">Thank you</h1>
         <p className="mt-4 text-[#6B5E62]">
-          Your order <strong className="text-[#2D2A2B]">{orderNumber}</strong> has been placed.
+          Your order{" "}
+          <strong className="text-[#2D2A2B]">{orderNumber}</strong> has been
+          placed.
         </p>
         <p className="mt-2 text-sm text-[#6B5E62]">
-          {paymentMethod === "cod"
-            ? "We'll contact you shortly to confirm. Pay on delivery. Shipping Rs 250."
-            : paymentMethod === "stripe"
-              ? "Payment received (or mock). We'll process your order shortly."
-              : "We'll send payment instructions shortly."}
+          {thankYouMessage(paymentMethod, gatewayLabel)}
         </p>
         <Link href="/products" className="mt-8 inline-block">
           <Button>Continue Shopping</Button>
@@ -163,20 +204,6 @@ export default function CheckoutPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to place order");
 
-      if (paymentMethod === "stripe") {
-        const payRes = await fetch("/api/payments/create-intent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: total,
-            currency: "pkr",
-            orderId: data.order.id,
-          }),
-        });
-        const payData = await payRes.json();
-        if (!payRes.ok) throw new Error(payData.error || "Payment failed");
-      }
-
       trackEvent("purchase", {
         orderId: data.order.id,
         orderNumber: data.order.orderNumber,
@@ -200,11 +227,18 @@ export default function CheckoutPage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-3xl font-semibold text-[#2D2A2B]">Checkout</h1>
-      <p className="mt-1 text-sm text-[#6B5E62]">COD available · Shipping from Rs 250 · All Pakistan</p>
+      <p className="mt-1 text-sm text-[#6B5E62]">
+        COD available · Shipping from Rs 250 · All Pakistan
+      </p>
 
-      <form onSubmit={handleSubmit} className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-2">
+      <form
+        onSubmit={handleSubmit}
+        className="mt-10 grid grid-cols-1 gap-12 lg:grid-cols-2"
+      >
         <div className="space-y-6">
-          <h2 className="text-lg font-medium text-[#2D2A2B]">Contact & Shipping (Pakistan)</h2>
+          <h2 className="text-lg font-medium text-[#2D2A2B]">
+            Contact & Shipping (Pakistan)
+          </h2>
           <Input
             placeholder="Email"
             type="email"
@@ -257,7 +291,9 @@ export default function CheckoutPage() {
                     onChange={() => setShippingMethod(opt.value)}
                   />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-[#2D2A2B]">{opt.label}</p>
+                    <p className="text-sm font-medium text-[#2D2A2B]">
+                      {opt.label}
+                    </p>
                     <p className="text-xs text-[#6B5E62]">PKR {opt.cost}</p>
                   </div>
                 </label>
@@ -266,7 +302,9 @@ export default function CheckoutPage() {
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-medium text-[#2D2A2B]">Payment Method</h3>
+            <h3 className="mb-3 text-sm font-medium text-[#2D2A2B]">
+              Payment Method
+            </h3>
             <div className="space-y-2">
               {paymentOptions.map((opt) => (
                 <label key={opt.value} className={radioClass}>
@@ -278,7 +316,9 @@ export default function CheckoutPage() {
                     onChange={() => setPaymentMethod(opt.value)}
                   />
                   <div>
-                    <p className="text-sm font-medium text-[#2D2A2B]">{opt.label}</p>
+                    <p className="text-sm font-medium text-[#2D2A2B]">
+                      {opt.label}
+                    </p>
                     <p className="text-xs text-[#6B5E62]">{opt.hint}</p>
                   </div>
                 </label>
@@ -297,7 +337,10 @@ export default function CheckoutPage() {
             }}
           >
             {items.map((item) => (
-              <div key={item.id} className="flex justify-between text-sm text-[#2D2A2B]">
+              <div
+                key={item.id}
+                className="flex justify-between text-sm text-[#2D2A2B]"
+              >
                 <span>
                   {item.name} × {item.quantity}
                 </span>
