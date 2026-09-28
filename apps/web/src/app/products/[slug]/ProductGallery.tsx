@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 
-export function ProductGallery({ images, name }: { images: string[]; name: string }) {
+export function ProductGallery({
+  images,
+  name,
+}: {
+  images: string[];
+  name: string;
+}) {
   const list = images?.length ? images : [];
   const [active, setActive] = useState(0);
   const src = list[active];
@@ -20,7 +26,10 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={src}
-            alt={name}
+            alt={`${name} Pakistan — product photo ${active + 1}`}
+            width={900}
+            height={1200}
+            fetchPriority={active === 0 ? "high" : "auto"}
             className="h-full w-full object-cover"
           />
         ) : (
@@ -34,7 +43,9 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
               type="button"
               aria-label="Previous image"
               className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/90 px-3 py-2 text-sm text-[#2D2A2B] shadow"
-              onClick={() => setActive((i) => (i - 1 + list.length) % list.length)}
+              onClick={() =>
+                setActive((i) => (i - 1 + list.length) % list.length)
+              }
             >
               ‹
             </button>
@@ -61,7 +72,13 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt="" className="h-full w-full object-cover" />
+              <img
+                src={url}
+                alt={`${name} thumbnail ${i + 1}`}
+                width={64}
+                height={64}
+                className="h-full w-full object-cover"
+              />
             </button>
           ))}
         </div>

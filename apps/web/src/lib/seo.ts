@@ -1,6 +1,5 @@
 /**
  * SEO + AEO content engine for Éclat by Tuba
- * Builds unique titles, metas, long-form copy, and FAQs per product.
  */
 
 import { siteConfig } from "@eclat/config";
@@ -49,7 +48,6 @@ export function buildSeoDescription(p: SeoProduct): string {
   return core.slice(0, 160);
 }
 
-/** AEO: answer-first ~40–60 words */
 export function buildAnswerFirst(p: SeoProduct): string {
   const variants = p.metadata?.variants || [];
   const shadeBit =
@@ -65,7 +63,6 @@ export function buildAnswerFirst(p: SeoProduct): string {
   );
 }
 
-/** Long-form unique body for on-page SEO (not thin manufacturer paste) */
 export function buildLongDescription(p: SeoProduct): string {
   const cat = p.category?.name || "beauty";
   const tags = (p.tags || []).join(", ");
@@ -88,6 +85,9 @@ export function buildLongDescription(p: SeoProduct): string {
 
 ${buildAnswerFirst(p)}
 
+### Quick definition
+**${p.name}** is a ${cat.toLowerCase()} product sold with nationwide Pakistan COD and transparent PKR pricing at ${siteConfig.name}.
+
 ${existing ? `### Product overview\n${existing}` : ""}
 
 ### Who it is for
@@ -97,7 +97,10 @@ ${p.name} suits anyone building a soft-gloss routine in Pakistan — students, p
 You pay **${priceLabel(p.price)}**${save} Cash on delivery is available across Pakistan. Standard shipping is a flat **Rs 250**. Express options may appear at checkout when available.
 
 ### How to use
-Apply on clean, dry lips or over a matching liner. For glosses and peptides, one thin layer gives shine; build for fuller colour. For kits and sets, follow the order: base → colour → gloss or topper.
+1. Start with clean, dry lips or skin as relevant.
+2. Apply a thin first layer; build for more colour or shine.
+3. For kits, follow base → colour → gloss or topper.
+4. Reapply as needed through the day.
 
 ### Why order from ${siteConfig.name}
 We focus on soft-gloss beauty for Pakistani customers: clear pricing in PKR, COD, and verified buyer reviews only (you need a real order to review). Packaging is checked before dispatch.
@@ -111,7 +114,6 @@ Unused items in original condition can be returned within 7 days as per our retu
 `.trim();
 }
 
-/** Product-specific FAQs (not identical COD spam on every page) */
 export function buildProductFaqs(p: SeoProduct): FaqItem[] {
   const faqs: FaqItem[] = [];
   const cat = (p.category?.slug || "").toLowerCase();
@@ -187,8 +189,36 @@ export function buildProductFaqs(p: SeoProduct): FaqItem[] {
     answer: `Yes. Only customers with a delivered or eligible order containing this product can submit a review. Fake or incentivised reviews are not published.`,
   });
 
-  // Cap 8
   return faqs.slice(0, 8);
+}
+
+/** HowTo schema steps for lip products */
+export function buildHowToSchema(p: SeoProduct) {
+  return {
+    "@type": "HowTo",
+    name: `How to apply ${p.name}`,
+    description: `Simple steps to wear ${p.name} for a soft-gloss look.`,
+    step: [
+      {
+        "@type": "HowToStep",
+        position: 1,
+        name: "Prep",
+        text: "Start with clean, dry lips.",
+      },
+      {
+        "@type": "HowToStep",
+        position: 2,
+        name: "Apply",
+        text: `Apply a thin layer of ${p.name}; build if you want more colour or shine.`,
+      },
+      {
+        "@type": "HowToStep",
+        position: 3,
+        name: "Finish",
+        text: "Optional: pair with liner for definition. Reapply as needed.",
+      },
+    ],
+  };
 }
 
 export function productCanonical(slug: string) {
@@ -197,4 +227,10 @@ export function productCanonical(slug: string) {
 
 export function collectionCanonical(slug: string) {
   return `${siteConfig.url}/collections/${slug}`;
+}
+
+export function collectionIntro(name: string, count: number): string {
+  return `Shop ${name} in Pakistan at ${siteConfig.name}. ${count} product${
+    count !== 1 ? "s" : ""
+  } with clear PKR prices, nationwide cash on delivery, and flat shipping of Rs 250. Every product page includes an answer-first summary, FAQs, and verified-buyer reviews only. Use filters on the main shop or open a product for shades, kits contents, and delivery details.`;
 }
