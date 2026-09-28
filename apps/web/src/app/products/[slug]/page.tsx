@@ -8,6 +8,14 @@ import { ProductAccordions } from "./ProductAccordions";
 import { ReviewsSection } from "./ReviewsSection";
 import { ProductCard } from "@eclat/ui";
 import { siteConfig } from "@eclat/config";
+import {
+  buildSeoTitle,
+  buildSeoDescription,
+  buildAnswerFirst,
+  buildLongDescription,
+  buildProductFaqs,
+  productCanonical,
+} from "@/lib/seo";
 import type { Metadata } from "next";
 
 interface Props {
@@ -17,14 +25,14 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(params.slug);
   if (!product) return { title: "Product" };
-  const meta = (product as any).metadata || {};
-  const title =
-    meta.seoTitle ||
-    `${product.name} Pakistan | Rs ${Number(product.price).toLocaleString()} | COD`;
-  const description =
-    meta.seoDescription ||
-    `${product.description || product.name}. Nationwide COD. Shipping Rs 250. ${siteConfig.name}.`;
-  const canonical = `${siteConfig.url}/products/${product.slug}`;
+  const seoProduct = {
+    ...product,
+    price: Number(product.price),
+    compareAtPrice: product.compareAtPrice != null ? Number(product.compareAtPrice) : null,
+  };
+  const title = buildSeoTitle(seoProduct);
+  const description = buildSeoDescription(seoProduct);
+  const canonical = productCanonical(product.slug);
 
   return {
     title,
@@ -34,32 +42,77 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: canonical,
-      images: product.images[0] ? [product.images[0]] : undefined,
+      images: product.images[0] ? [{ url: product.images[0], alt: product.name }] : undefined,
       type: "website",
+      locale: "en_PK",
+      siteName: siteConfig.name,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
     },
+    robots: { index: true, follow: true },
   };
+}
+
+function renderMarkdownish(text: string) {
+  return text.split("\n").map((line, i) => {
+    if (line.startsWith("## ")) {
+      return (
+        <h2 key={i} className="mt-8 text-xl font-semibold text-[#2D2A2B]">
+          {line.replace(/^## /, "")}
+        </h2>
+      );
+    }
+    if (line.startsWith("### ")) {
+      return (
+        <h3 key={i} className="mt-6 text-base font-semibold text-[#2D2A2B]">
+          {line.replace(/^### /, "")}
+        </h3>
+      );
+    }
+    if (line.startsWith("- ")) {
+      return (
+        <li key={i} className="ml-4 list-disc text-sm text-[#6B5E62]">
+          {line.replace(/^- /, "").replace(/\*\*(.*?)\*\*/g, "$1")}
+        </li>
+      );
+    }
+    if (!line.trim()) return <br key={i} />;
+    return (
+      <p key={i} className="mt-2 text-sm leading-relaxed text-[#6B5E62]">
+        {line.replace(/\*\*(.*?)\*\*/g, "$1")}
+      </p>
+    );
+  });
 }
 
 export default async function ProductDetailPage({ params }: Props) {
   const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
-  const all = await getAllProducts(product.category?.slug);
-  const related = all.filter((p) => p.id !== product.id).slice(0, 3);
-  const stats = await getReviewStats(product.id);
-  const meta = (product as any).metadata || {};
-  const variants = (meta.variants || []) as { code: string; name: string; inventory?: number }[];
-  const lowStock = product.inventory > 0 && product.inventory <= 10;
-  const answerFirst =
-    product.description ||
-    `${product.name} in Pakistan — cash on delivery, shipping Rs 250 nationwide.`;
+  const seoProduct = {
+    ...product,
+    price: Number(product.price),
+    compareAtPrice:
+      product.compareAtPrice != null ? Number(product.compareAtPrice) : null,
+  };
 
-  const productUrl = `${siteConfig.url}/products/${product.slug}`;
+  const all = await getAllProducts(product.category?.slug);
+  const related = all.filter((p) => p.id !== product.id).slice(0, 4);
+  const stats = await getReviewStats(product.id);
+  const meta = product.metadata || {};
+  const variants = (meta.variants || []) as {
+    code: string;
+    name: string;
+    inventory?: number;
+  }[];
+  const lowStock = product.inventory > 0 && product.inventory <= 10;
+  const answerFirst = buildAnswerFirst(seoProduct);
+  const longCopy = buildLongDescription(seoProduct);
+  const faqs = buildProductFaqs(seoProduct);
+  const productUrl = productCanonical(product.slug);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -74,21 +127,39 @@ export default async function ProductDetailPage({ params }: Props) {
             name: "Shop",
             item: `${siteConfig.url}/products`,
           },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: product.name,
-            item: productUrl,
-          },
+          ...(product.category
+            ? [
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: product.category.name,
+                  item: `${siteConfig.url}/collections/${product.category.slug}`,
+                },
+                {
+                  "@type": "ListItem",
+                  position: 4,
+                  name: product.name,
+                  item: productUrl,
+                },
+              ]
+            : [
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: product.name,
+                  item: productUrl,
+                },
+              ]),
         ],
       },
       {
         "@type": "Product",
         name: product.name,
-        description: product.description,
+        description: buildSeoDescription(seoProduct),
         image: product.images,
         sku: product.slug,
         brand: { "@type": "Brand", name: siteConfig.name },
+        category: product.category?.name,
         offers: {
           "@type": "Offer",
           price: Number(product.price),
@@ -98,6 +169,7 @@ export default async function ProductDetailPage({ params }: Props) {
               ? "https://schema.org/InStock"
               : "https://schema.org/OutOfStock",
           url: productUrl,
+          seller: { "@type": "Organization", name: siteConfig.name },
           shippingDetails: {
             "@type": "OfferShippingDetails",
             shippingRate: {
@@ -123,45 +195,17 @@ export default async function ProductDetailPage({ params }: Props) {
       },
       {
         "@type": "FAQPage",
-        mainEntity: [
-          {
-            "@type": "Question",
-            name: `Is ${product.name} available with COD in Pakistan?`,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: `Yes. ${product.name} ships all Pakistan with cash on delivery. Flat shipping is Rs 250.`,
-            },
-          },
-          {
-            "@type": "Question",
-            name: "How much is shipping?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "Flat shipping Rs 250 nationwide across Pakistan.",
-            },
-          },
-          {
-            "@type": "Question",
-            name: "Can I return the product?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "Easy 7-day returns on unused items in original condition.",
-            },
-          },
-          {
-            "@type": "Question",
-            name: "Are reviews verified?",
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: "Yes. Only customers with a real order for this product can leave a review.",
-            },
-          },
-        ],
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.question,
+          acceptedAnswer: { "@type": "Answer", text: f.answer },
+        })),
       },
       {
         "@type": "Organization",
         name: siteConfig.name,
         url: siteConfig.url,
+        description: siteConfig.description,
       },
     ],
   };
@@ -181,6 +225,17 @@ export default async function ProductDetailPage({ params }: Props) {
         <Link href="/products" className="hover:text-[#C45C7A]">
           Shop
         </Link>
+        {product.category && (
+          <>
+            <span className="mx-1">/</span>
+            <Link
+              href={`/collections/${product.category.slug}`}
+              className="hover:text-[#C45C7A]"
+            >
+              {product.category.name}
+            </Link>
+          </>
+        )}
         <span className="mx-1">/</span>
         <span className="text-[#2D2A2B]">{product.name}</span>
       </nav>
@@ -196,13 +251,12 @@ export default async function ProductDetailPage({ params }: Props) {
             {product.name}
           </h1>
 
-          {/* AEO answer-first */}
           <p className="mt-3 text-sm leading-relaxed text-[#2D2A2B]">{answerFirst}</p>
 
           {stats.count > 0 && (
             <p className="mt-2 text-sm text-[#6B5E62]">
               <span className="text-[#F5A623]">★</span> {stats.average.toFixed(1)}{" "}
-              ({stats.count})
+              ({stats.count} verified reviews)
             </p>
           )}
 
@@ -229,17 +283,16 @@ export default async function ProductDetailPage({ params }: Props) {
               <h2 className="text-sm font-semibold text-[#2D2A2B]">Shades</h2>
               <ul className="mt-2 grid grid-cols-1 gap-1 text-sm text-[#6B5E62] sm:grid-cols-2">
                 {variants.map((v) => (
-                  <li key={v.code} className="rounded-[12px] border border-[#F0D6E0] px-2 py-1">
+                  <li
+                    key={v.code}
+                    className="rounded-[12px] border border-[#F0D6E0] px-2 py-1"
+                  >
                     {v.code} {v.name}
                   </li>
                 ))}
               </ul>
             </div>
           )}
-
-          <p className="mt-6 leading-relaxed text-[#6B5E62]">
-            {product.fullDescription || product.description}
-          </p>
 
           <div className="mt-8 hidden md:block">
             <AddToCartButton product={product} />
@@ -251,22 +304,54 @@ export default async function ProductDetailPage({ params }: Props) {
             <p className="mt-1 text-[#6B5E62]">Verified buyer reviews only</p>
           </div>
 
-          <ProductAccordions
-            description={product.fullDescription || product.description}
-          />
+          <ProductAccordions description={product.fullDescription || product.description} />
         </div>
       </div>
 
       <AddToCartButton product={product} sticky />
 
+      {/* Long-form SEO body */}
+      <article className="prose-sm mt-16 max-w-3xl">{renderMarkdownish(longCopy)}</article>
+
+      {/* Visible FAQ for AEO + users */}
+      <section className="mt-16 max-w-3xl" aria-labelledby="faq-heading">
+        <h2 id="faq-heading" className="text-2xl font-semibold text-[#2D2A2B]">
+          Frequently asked questions
+        </h2>
+        <div className="mt-6 space-y-4">
+          {faqs.map((f) => (
+            <details
+              key={f.question}
+              className="rounded-[16px] border border-[#F0D6E0] bg-white p-4"
+            >
+              <summary className="cursor-pointer text-sm font-semibold text-[#2D2A2B]">
+                {f.question}
+              </summary>
+              <p className="mt-2 text-sm leading-relaxed text-[#6B5E62]">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       <ReviewsSection productId={product.id} />
 
       {related.length > 0 && (
         <section className="mt-20">
-          <h2 className="mb-8 text-2xl font-semibold text-[#2D2A2B]">
+          <h2 className="mb-4 text-2xl font-semibold text-[#2D2A2B]">
             Complete the look
           </h2>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <p className="mb-8 text-sm text-[#6B5E62]">
+            Related {product.category?.name || "products"} — also COD · Rs 250 shipping.{" "}
+            {product.category && (
+              <Link
+                href={`/collections/${product.category.slug}`}
+                className="text-[#C45C7A] underline"
+              >
+                View all {product.category.name}
+              </Link>
+            )}
+          </p>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {related.map((p) => (
               <ProductCard
                 key={p.id}
@@ -283,7 +368,19 @@ export default async function ProductDetailPage({ params }: Props) {
       )}
 
       <p className="mt-12 text-xs text-[#6B5E62]">
-        Last updated: 27 Sep 2026 · {siteConfig.name}
+        Last updated: {new Date().toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })}{" "}
+        · {siteConfig.name} ·{" "}
+        <Link href="/shipping" className="underline hover:text-[#C45C7A]">
+          Shipping & COD
+        </Link>{" "}
+        ·{" "}
+        <Link href="/returns" className="underline hover:text-[#C45C7A]">
+          Returns
+        </Link>
       </p>
     </main>
   );
