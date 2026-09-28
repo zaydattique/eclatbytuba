@@ -14,6 +14,7 @@ import {
   buildAnswerFirst,
   buildLongDescription,
   buildProductFaqs,
+  buildHowToSchema,
   productCanonical,
 } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -28,7 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const seoProduct = {
     ...product,
     price: Number(product.price),
-    compareAtPrice: product.compareAtPrice != null ? Number(product.compareAtPrice) : null,
+    compareAtPrice:
+      product.compareAtPrice != null ? Number(product.compareAtPrice) : null,
   };
   const title = buildSeoTitle(seoProduct);
   const description = buildSeoDescription(seoProduct);
@@ -42,7 +44,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description,
       url: canonical,
-      images: product.images[0] ? [{ url: product.images[0], alt: product.name }] : undefined,
+      images: product.images[0]
+        ? [{ url: product.images[0], alt: product.name }]
+        : undefined,
       type: "website",
       locale: "en_PK",
       siteName: siteConfig.name,
@@ -113,101 +117,111 @@ export default async function ProductDetailPage({ params }: Props) {
   const longCopy = buildLongDescription(seoProduct);
   const faqs = buildProductFaqs(seoProduct);
   const productUrl = productCanonical(product.slug);
+  const isLip =
+    (product.category?.slug || "").includes("lip") ||
+    /lip/i.test(product.slug) ||
+    (product.tags || []).some((t) => /lip/i.test(t));
+
+  const graph: any[] = [
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Shop",
+          item: `${siteConfig.url}/products`,
+        },
+        ...(product.category
+          ? [
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: product.category.name,
+                item: `${siteConfig.url}/collections/${product.category.slug}`,
+              },
+              {
+                "@type": "ListItem",
+                position: 4,
+                name: product.name,
+                item: productUrl,
+              },
+            ]
+          : [
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: product.name,
+                item: productUrl,
+              },
+            ]),
+      ],
+    },
+    {
+      "@type": "Product",
+      name: product.name,
+      description: buildSeoDescription(seoProduct),
+      image: product.images,
+      sku: product.slug,
+      brand: { "@type": "Brand", name: siteConfig.name },
+      category: product.category?.name,
+      offers: {
+        "@type": "Offer",
+        price: Number(product.price),
+        priceCurrency: "PKR",
+        availability:
+          product.inventory > 0
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+        url: productUrl,
+        seller: { "@type": "Organization", name: siteConfig.name },
+        shippingDetails: {
+          "@type": "OfferShippingDetails",
+          shippingRate: {
+            "@type": "MonetaryAmount",
+            value: "250",
+            currency: "PKR",
+          },
+          shippingDestination: {
+            "@type": "DefinedRegion",
+            addressCountry: "PK",
+          },
+        },
+      },
+      ...(stats.count > 0
+        ? {
+            aggregateRating: {
+              "@type": "AggregateRating",
+              ratingValue: stats.average.toFixed(1),
+              reviewCount: stats.count,
+            },
+          }
+        : {}),
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: { "@type": "Answer", text: f.answer },
+      })),
+    },
+    {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      description: siteConfig.description,
+    },
+  ];
+
+  if (isLip) {
+    graph.push(buildHowToSchema(seoProduct));
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Shop",
-            item: `${siteConfig.url}/products`,
-          },
-          ...(product.category
-            ? [
-                {
-                  "@type": "ListItem",
-                  position: 3,
-                  name: product.category.name,
-                  item: `${siteConfig.url}/collections/${product.category.slug}`,
-                },
-                {
-                  "@type": "ListItem",
-                  position: 4,
-                  name: product.name,
-                  item: productUrl,
-                },
-              ]
-            : [
-                {
-                  "@type": "ListItem",
-                  position: 3,
-                  name: product.name,
-                  item: productUrl,
-                },
-              ]),
-        ],
-      },
-      {
-        "@type": "Product",
-        name: product.name,
-        description: buildSeoDescription(seoProduct),
-        image: product.images,
-        sku: product.slug,
-        brand: { "@type": "Brand", name: siteConfig.name },
-        category: product.category?.name,
-        offers: {
-          "@type": "Offer",
-          price: Number(product.price),
-          priceCurrency: "PKR",
-          availability:
-            product.inventory > 0
-              ? "https://schema.org/InStock"
-              : "https://schema.org/OutOfStock",
-          url: productUrl,
-          seller: { "@type": "Organization", name: siteConfig.name },
-          shippingDetails: {
-            "@type": "OfferShippingDetails",
-            shippingRate: {
-              "@type": "MonetaryAmount",
-              value: "250",
-              currency: "PKR",
-            },
-            shippingDestination: {
-              "@type": "DefinedRegion",
-              addressCountry: "PK",
-            },
-          },
-        },
-        ...(stats.count > 0
-          ? {
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: stats.average.toFixed(1),
-                reviewCount: stats.count,
-              },
-            }
-          : {}),
-      },
-      {
-        "@type": "FAQPage",
-        mainEntity: faqs.map((f) => ({
-          "@type": "Question",
-          name: f.question,
-          acceptedAnswer: { "@type": "Answer", text: f.answer },
-        })),
-      },
-      {
-        "@type": "Organization",
-        name: siteConfig.name,
-        url: siteConfig.url,
-        description: siteConfig.description,
-      },
-    ],
+    "@graph": graph,
   };
 
   return (
@@ -304,16 +318,18 @@ export default async function ProductDetailPage({ params }: Props) {
             <p className="mt-1 text-[#6B5E62]">Verified buyer reviews only</p>
           </div>
 
-          <ProductAccordions description={product.fullDescription || product.description} />
+          <ProductAccordions
+            description={product.fullDescription || product.description}
+          />
         </div>
       </div>
 
       <AddToCartButton product={product} sticky />
 
-      {/* Long-form SEO body */}
-      <article className="prose-sm mt-16 max-w-3xl">{renderMarkdownish(longCopy)}</article>
+      <article className="prose-sm mt-16 max-w-3xl">
+        {renderMarkdownish(longCopy)}
+      </article>
 
-      {/* Visible FAQ for AEO + users */}
       <section className="mt-16 max-w-3xl" aria-labelledby="faq-heading">
         <h2 id="faq-heading" className="text-2xl font-semibold text-[#2D2A2B]">
           Frequently asked questions
@@ -341,7 +357,8 @@ export default async function ProductDetailPage({ params }: Props) {
             Complete the look
           </h2>
           <p className="mb-8 text-sm text-[#6B5E62]">
-            Related {product.category?.name || "products"} — also COD · Rs 250 shipping.{" "}
+            Related {product.category?.name || "products"} — also COD · Rs 250
+            shipping.{" "}
             {product.category && (
               <Link
                 href={`/collections/${product.category.slug}`}
@@ -368,7 +385,8 @@ export default async function ProductDetailPage({ params }: Props) {
       )}
 
       <p className="mt-12 text-xs text-[#6B5E62]">
-        Last updated: {new Date().toLocaleDateString("en-GB", {
+        Last updated:{" "}
+        {new Date().toLocaleDateString("en-GB", {
           day: "numeric",
           month: "short",
           year: "numeric",
