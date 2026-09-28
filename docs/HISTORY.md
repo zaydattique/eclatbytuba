@@ -2,20 +2,19 @@
 
 ---
 
-## 2026-09-28 — Phase 8 complete: 67-product catalog import
+## 2026-09-28 — Catalog chunks pushed (68 products)
 
 **What**
-- Imported Shopify export `eclat_products_clean.json` (67 SKUs) + Kiko owner add
-- Categories mapped: cosmetic-kits, lipstick, lip-gloss, lip-sets, nails, tools, eyes, face
-- `data.ts` → `catalog-seed.ts` → product chunks with images, prices, SEO metadata
-- Each product: seoTitle/seoDescription with Pakistan + COD + shipping Rs 250
-- Full catalog files also under project artifacts/phase8 for recovery
+- Pushed `catalog-chunk-1` … `catalog-chunk-5` with full Shopify catalog + Kiko
+- Counts: 14 + 14 + 14 + 14 + 12 = **68 products**
+- Each product: slug, price, compareAt, image CDN, SEO metadata (Pakistan · COD · Rs 250)
+- `catalog-seed.ts` spreads all five chunks into mem seed via `data.ts`
 
 **Why**
-- Phase 8 DoD: full catalog available to storefront/admin mem layer; launch path ready
+- Complete Phase 8 product import in repo
 
 ---
 
-## 2026-09-27 — Phase 7–0
+## Prior
 
-SEO/AEO, analytics, play, checkout, products foundation.
+Phases 0–8 foundation through SEO/AEO and catalog pipeline.
