@@ -20,7 +20,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.name,
+    default: `${siteConfig.name} | Soft Gloss Beauty Pakistan`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -54,17 +54,38 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  logo: `${siteConfig.url}/og.png`,
+  description: siteConfig.description,
+  email: siteConfig.email || "hello@eclatbytuba.com",
+  areaServed: {
+    "@type": "Country",
+    name: "Pakistan",
+  },
+  sameAs: [
+    // Fill real profiles when live — empty sameAs hurts less than fake URLs
+  ],
+};
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en-PK">
       <body
         className={`${plusJakarta.variable} font-sans antialiased`}
         style={{ background: "#FFF0F5", color: "#2D2A2B" }}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
         <PixelScripts />
         <CartProvider>
           <Header />
