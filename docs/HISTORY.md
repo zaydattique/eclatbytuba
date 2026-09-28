@@ -2,33 +2,34 @@
 
 ---
 
-## 2026-09-28 — Launch polish: Pakistan payments
+## 2026-09-28 — SEO/AEO hard upgrade
 
 **What**
-- Defaults: COD + bank + JazzCash + EasyPaisa enabled; Stripe disabled
-- New admin slot: **customGateway** (any PK third-party provider — PayFast/PayPro/etc.)
-- Checkout: PK methods only in primary list; thank-you copy per method
-- Stripe kept as optional admin placeholder (not available for most PK merchants)
-- Settings UI labels Pakistan-first
+- `lib/seo.ts`: unique titles, 150–160 metas, answer-first, long-form PDP copy, product-specific FAQs
+- PDP: visible FAQ + FAQPage schema, Breadcrumb with collections, richer Product/Offer JSON-LD
+- `/collections/[slug]` indexable category pages + ItemList schema
+- Trust: `/about`, `/shipping`, `/returns`, `/contact`
+- Pillars: `/guides/*` (Rhode, Kiko, under 2000, glam kit)
+- Sitemap: products, collections, guides, trust pages
+- Footer internal links; siteConfig default URL production-oriented
 
 **Why**
-- Stripe unavailable in Pakistan; owner will connect local gateway via admin later
+- Prior SEO was technical-only; content/AEO were thin templates
 
 ---
 
-## 2026-09-28 — Catalog chunks pushed (68 products)
+## 2026-09-28 — Launch polish: Pakistan payments
 
-**What**
-- Pushed `catalog-chunk-1` … `catalog-chunk-5` with full Shopify catalog + Kiko
-- Counts: 14 + 14 + 14 + 14 + 12 = **68 products**
-- Each product: slug, price, compareAt, image CDN, SEO metadata (Pakistan · COD · Rs 250)
-- `catalog-seed.ts` spreads all five chunks into mem seed via `data.ts`
+COD + bank + JazzCash + EasyPaisa defaults; customGateway admin slot; Stripe placeholder only.
 
-**Why**
-- Complete Phase 8 product import in repo
+---
+
+## 2026-09-28 — Catalog chunks (68 products)
+
+Full Shopify catalog + Kiko in mem seed.
 
 ---
 
 ## Prior
 
-Phases 0–8 foundation through SEO/AEO and catalog pipeline.
+Phases 0–8 foundation.
