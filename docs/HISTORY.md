@@ -2,6 +2,20 @@
 
 ---
 
+## 2026-09-28 — Launch polish: Pakistan payments
+
+**What**
+- Defaults: COD + bank + JazzCash + EasyPaisa enabled; Stripe disabled
+- New admin slot: **customGateway** (any PK third-party provider — PayFast/PayPro/etc.)
+- Checkout: PK methods only in primary list; thank-you copy per method
+- Stripe kept as optional admin placeholder (not available for most PK merchants)
+- Settings UI labels Pakistan-first
+
+**Why**
+- Stripe unavailable in Pakistan; owner will connect local gateway via admin later
+
+---
+
 ## 2026-09-28 — Catalog chunks pushed (68 products)
 
 **What**
