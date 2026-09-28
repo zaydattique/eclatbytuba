@@ -19,6 +19,7 @@ export interface Product {
   inventory: number;
   isFeatured: boolean;
   isActive?: boolean;
+  metadata?: any;
 }
 
 export async function getAllProducts(categorySlug?: string): Promise<Product[]> {
@@ -58,5 +59,6 @@ function normalize(p: any): Product {
     inventory: p.inventory ?? 0,
     isFeatured: p.isFeatured ?? false,
     isActive: p.isActive ?? true,
+    metadata: p.metadata || null,
   };
 }
