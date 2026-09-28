@@ -8,7 +8,10 @@ interface Props {
   params: { id: string };
 }
 
-const statusVariant: Record<string, "warning" | "default" | "secondary" | "success" | "danger"> = {
+const statusVariant: Record<
+  string,
+  "warning" | "default" | "secondary" | "success" | "danger"
+> = {
   PENDING: "warning",
   CONFIRMED: "default",
   PROCESSING: "secondary",
@@ -26,25 +29,35 @@ const cardStyle = {
 
 export default async function OrderDetailPage({ params }: Props) {
   const order = await getOrderById(params.id);
-  if (!order) notFound();
+  if (!order) {
+    notFound();
+  }
 
   const o = order as any;
   const addr = o.shippingAddress || {};
+  const badgeVariant = statusVariant[o.status] || "default";
 
   return (
     <div>
-      <Link href="/orders" className="text-sm text-[#6B5E62] hover:text-[#C45C7A]">
-        ← Back to orders
+      <Link
+        href="/orders"
+        className="text-sm text-[#6B5E62] hover:text-[#C45C7A]"
+      >
+        Back to orders
       </Link>
 
       <div className="mt-4 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-[#2D2A2B]">{o.orderNumber}</h1>
+          <h1 className="text-2xl font-semibold text-[#2D2A2B]">
+            {o.orderNumber}
+          </h1>
           <p className="mt-1 text-sm text-[#6B5E62]">
-            {o.createdAt ? new Date(o.createdAt).toLocaleString("en-GB") : ""}
+            {o.createdAt
+              ? new Date(o.createdAt).toLocaleString("en-GB")
+              : ""}
           </p>
         </div>
-        <Badge variant={statusVariant[o.status] || "default">{o.status}</Badge>
+        <Badge variant={badgeVariant}>{o.status}</Badge>
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -53,9 +66,12 @@ export default async function OrderDetailPage({ params }: Props) {
             <h2 className="font-medium text-[#2D2A2B]">Items</h2>
             <div className="mt-4 space-y-3">
               {(o.items || []).map((item: any) => (
-                <div key={item.id} className="flex justify-between text-sm text-[#2D2A2B]">
+                <div
+                  key={item.id}
+                  className="flex justify-between text-sm text-[#2D2A2B]"
+                >
                   <span>
-                    {item.name} × {item.quantity}
+                    {item.name} x {item.quantity}
                   </span>
                   <span>PKR {Number(item.total).toLocaleString()}</span>
                 </div>
@@ -73,11 +89,13 @@ export default async function OrderDetailPage({ params }: Props) {
               {(o.payments || []).map((p: any) => (
                 <div key={p.id} className="flex justify-between gap-2">
                   <span className="capitalize text-[#2D2A2B]">
-                    {p.method?.replace(/_/g, " ")}
+                    {(p.method || "").replace(/_/g, " ")}
                   </span>
                   <span className="flex items-center gap-2 text-[#2D2A2B]">
                     PKR {Number(p.amount).toLocaleString()}{" "}
-                    <Badge variant={p.status === "PAID" ? "success" : "warning"}>
+                    <Badge
+                      variant={p.status === "PAID" ? "success" : "warning"}
+                    >
                       {p.status}
                     </Badge>
                   </span>
@@ -92,10 +110,13 @@ export default async function OrderDetailPage({ params }: Props) {
               <div className="mt-3 space-y-1 text-sm text-[#6B5E62]">
                 {o.trackingNumber && (
                   <p>
-                    Tracking: <span className="text-[#2D2A2B]">{o.trackingNumber}</span>
+                    Tracking:{" "}
+                    <span className="text-[#2D2A2B]">{o.trackingNumber}</span>
                   </p>
                 )}
-                {o.notes && <p className="whitespace-pre-wrap">{o.notes}</p>}
+                {o.notes && (
+                  <p className="whitespace-pre-wrap">{o.notes}</p>
+                )}
               </div>
             </div>
           )}
@@ -105,9 +126,9 @@ export default async function OrderDetailPage({ params }: Props) {
           <div className={cardClass} style={cardStyle}>
             <h2 className="font-medium text-[#2D2A2B]">Customer</h2>
             <div className="mt-3 space-y-1 text-sm text-[#6B5E62]">
-              <p>{addr.fullName || "—"}</p>
+              <p>{addr.fullName || "-"}</p>
               <p>{o.email}</p>
-              <p>{o.phone || "—"}</p>
+              <p>{o.phone || "-"}</p>
             </div>
           </div>
 
