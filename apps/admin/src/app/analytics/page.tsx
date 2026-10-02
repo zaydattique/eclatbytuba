@@ -80,8 +80,7 @@ export default function AnalyticsPage() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    fetch(`${base}/api/analytics?days=30`)
+    fetch(`/api/analytics?days=30`)
       .then((r) => r.json())
       .then((d) => {
         if (d.error) setErr(d.error);
@@ -291,7 +290,7 @@ export default function AnalyticsPage() {
             "CPC / CPM / ROAS / CPA",
             "Retention 1/7/30 · LTV",
             "Cohorts · paths · attribution",
-            "Heatmaps · · session recordings · A/B",
+            "Heatmaps · session recordings · A/B",
           ]}
         />
       </Card>
