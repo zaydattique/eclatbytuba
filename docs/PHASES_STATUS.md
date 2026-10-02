@@ -6,19 +6,20 @@
 |-------|------|--------|
 | 0–7 | Foundation → SEO/AEO/PWA | ✅ |
 | 8 | Import 67 Products + Content + Launch | ✅ |
-| **9** | **Security Hardening** | 🔄 In progress |
+| **9** | **Security Hardening** | ✅ |
 | 10 | Data & Storage Foundation | ⬜ |
 | 11 | Production Observability & Quality | ⬜ |
 | 12 | Payments, Trust & Operations | ⬜ |
 | 13 | UX Scale & Polish | ⬜ |
 
-## Phase 9 — Security Hardening (big chunk)
+## Phase 9 — Security Hardening ✅
 
 - [x] Harden auth: no production fallback JWT secret; no production demo password defaults
-- [x] `requireAdminSession` helper
-- [x] Move admin mutations to **admin app** same-origin APIs (orders, settings, upload, products, reviews, analytics)
-- [x] Lock public web APIs: no open order list/update, no settings secrets, no open upload/product mutate
+- [x] `requireAdminSession` + `requireAdminApiSecret` helpers
+- [x] Admin mutations on **admin app** same-origin APIs (orders, settings, upload, products, reviews, analytics)
+- [x] Public web APIs locked (no open order list/update, settings secrets, upload, product mutate, admin reviews)
 - [x] Admin middleware returns JSON 401 for API routes
+- [x] Login rate limiting (5 / 15 min)
 - [x] Remove demo credentials from login UI
 - [x] Update `.env.example`
 - [ ] Owner: set strong `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` on deploy
@@ -54,7 +55,7 @@
 - Dead code / residual deprecated lists cleanup
 - Feature flags / background jobs as needed
 
-## Owner-side (unchanged)
+## Owner-side
 
 | Item | Status |
 |------|--------|
