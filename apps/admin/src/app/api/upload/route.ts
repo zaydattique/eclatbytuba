@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { validateImageFile } from "@eclat/ui";
 import { requireAdminSession } from "@eclat/auth";
-import { rateLimit, RATE_LIMITS, clientKey } from "@eclat/config";
+import {
+  rateLimit,
+  RATE_LIMITS,
+  clientKey,
+  uploadImageBuffer,
+} from "@eclat/config";
 
 /**
  * Admin image upload (session required).
- * Phase 10 will swap local disk for object storage (R2/S3).
+ * Uses S3/R2 when configured; otherwise local public/uploads.
  */
 export async function POST(req: NextRequest) {
   const user = await requireAdminSession(req);
@@ -19,7 +22,7 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "unknown";
-  const rl = rateLimit({
+  const rl = await rateLimit({
     key: clientKey("upload", ip, user.id),
     limit: RATE_LIMITS.upload.limit,
     windowMs: RATE_LIMITS.upload.windowMs,
@@ -56,18 +59,20 @@ export async function POST(req: NextRequest) {
     const ext = (file.name.split(".").pop() || "jpg")
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "");
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext || "jpg"}`;
+    const filename = `image.${ext || "jpg"}`;
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, filename), buffer);
+    const result = await uploadImageBuffer({
+      buffer,
+      filename,
+      contentType: file.type || "image/jpeg",
+      folder: "products",
+    });
 
-    const webBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "";
-    const url = webBase
-      ? `${webBase}/uploads/${filename}`
-      : `/uploads/${filename}`;
-
-    return NextResponse.json({ url, filename });
+    return NextResponse.json({
+      url: result.url,
+      filename: result.key,
+      storage: result.storage,
+    });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "Upload failed";
     console.error("Upload error:", e);
