@@ -7,7 +7,11 @@
   "scripts": {
     "lint": "echo 'lint config'"
   },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.670.0"
+  },
   "devDependencies": {
+    "@types/node": "^20.16.5",
     "typescript": "^5.6.2"
   }
 }

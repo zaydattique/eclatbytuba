@@ -15,6 +15,8 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 export * from "@prisma/client";
 export default prisma;
 
+export { useDb } from "./db-mode";
+
 export {
   getCategories,
   getProducts,
