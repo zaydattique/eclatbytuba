@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
       "unknown";
-    const rl = rateLimit({
+    const rl = await rateLimit({
       key: clientKey("checkout", ip),
       limit: RATE_LIMITS.checkout.limit,
       windowMs: RATE_LIMITS.checkout.windowMs,
