@@ -76,7 +76,7 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-4 text-center text-xs text-gray-400">
-          Demo: admin@eclatbytuba.com / eclat2026
+          Use credentials from your environment configuration.
         </p>
       </div>
     </div>
