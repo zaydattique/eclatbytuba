@@ -1,45 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
-import { recordHit, summarizeAnalytics, getOrders } from "@eclat/db";
+import { recordHit } from "@eclat/db";
+import { requireAdminApiSecret } from "@eclat/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    if (!body.sessionId || !body.type) {
-      return NextResponse.json(
-        { error: "sessionId and type required" },
-        { status: 400 }
-      );
+    const body = await req.json().catch(() => ({}));
+    if (body.type || body.path || body.sessionId) {
+      await recordHit({
+        type: typeof body.type === "string" ? body.type : "pageview",
+        path: typeof body.path === "string" ? body.path : "/",
+        sessionId: typeof body.sessionId === "string" ? body.sessionId : undefined,
+        userId: typeof body.userId === "string" ? body.userId : undefined,
+        durationMs: typeof body.durationMs === "number" ? body.durationMs : undefined,
+        engaged: typeof body.engaged === "boolean" ? body.engaged : undefined,
+        props: body.props && typeof body.props === "object" ? body.props : undefined,
+        source: typeof body.source === "string" ? body.source : undefined,
+        medium: typeof body.medium === "string" ? body.medium : undefined,
+        campaign: typeof body.campaign === "string" ? body.campaign : undefined,
+        device: typeof body.device === "string" ? body.device : undefined,
+        country: typeof body.country === "string" ? body.country : undefined,
+      });
     }
-
-    const hit = recordHit({
-      type: body.type,
-      sessionId: String(body.sessionId),
-      path: body.path,
-      userId: body.userId,
-      durationMs: body.durationMs != null ? Number(body.durationMs) : undefined,
-      engaged: body.engaged,
-      props: body.props,
-      source: body.source,
-      medium: body.medium,
-      campaign: body.campaign,
-      device: body.device,
-      country: body.country,
-      ts: body.ts,
-    });
-
-    return NextResponse.json({ ok: true, id: hit.id });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Analytics error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest) {
-  try {
-    const days = Number(new URL(req.url).searchParams.get("days") || 30);
-    const orders = await getOrders();
-    const summary = summarizeAnalytics(orders as any[], days);
-    return NextResponse.json(summary);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  if (!requireAdminApiSecret(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  return NextResponse.json(
+    { error: "Use admin app analytics API" },
+    { status: 410 }
+  );
 }

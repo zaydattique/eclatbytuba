@@ -3,11 +3,11 @@ import {
   getProductReviews,
   getReviewStats,
   createReview,
-  getAllReviews,
-  moderateReview,
 } from "@eclat/db";
 import { rateLimit, RATE_LIMITS, clientKey } from "@eclat/config";
+import { requireAdminApiSecret } from "@eclat/auth";
 
+/** Public: product reviews + submit. Admin list/moderate → admin app. */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
@@ -15,8 +15,13 @@ export async function GET(req: NextRequest) {
     const admin = searchParams.get("admin") === "true";
 
     if (admin) {
-      const reviews = await getAllReviews();
-      return NextResponse.json({ reviews });
+      if (!requireAdminApiSecret(req)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      return NextResponse.json(
+        { error: "Use admin app reviews API" },
+        { status: 410 }
+      );
     }
 
     if (!productId) {
@@ -28,8 +33,9 @@ export async function GET(req: NextRequest) {
       getReviewStats(productId),
     ]);
     return NextResponse.json({ reviews, stats });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Failed to load reviews";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -77,26 +83,18 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Failed to submit review";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
 
 export async function PATCH(req: NextRequest) {
-  try {
-    const body = await req.json();
-    if (!body.id || typeof body.isApproved !== "boolean") {
-      return NextResponse.json(
-        { error: "id and isApproved required" },
-        { status: 400 }
-      );
-    }
-    const review = await moderateReview(body.id, body.isApproved);
-    if (!review) {
-      return NextResponse.json({ error: "Review not found" }, { status: 404 });
-    }
-    return NextResponse.json({ review });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  if (!requireAdminApiSecret(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  return NextResponse.json(
+    { error: "Use admin app reviews API" },
+    { status: 410 }
+  );
 }
