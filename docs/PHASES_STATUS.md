@@ -6,8 +6,8 @@
 |-------|------|--------|
 | 0–7 | Foundation → SEO/AEO/PWA | ✅ |
 | 8 | Import 67 Products + Content + Launch | ✅ |
-| **9** | **Security Hardening** | ✅ |
-| 10 | Data & Storage Foundation | ⬜ |
+| 9 | Security Hardening | ✅ |
+| **10** | **Data & Storage Foundation** | ✅ |
 | 11 | Production Observability & Quality | ⬜ |
 | 12 | Payments, Trust & Operations | ⬜ |
 | 13 | UX Scale & Polish | ⬜ |
@@ -16,21 +16,23 @@
 
 - [x] Harden auth: no production fallback JWT secret; no production demo password defaults
 - [x] `requireAdminSession` + `requireAdminApiSecret` helpers
-- [x] Admin mutations on **admin app** same-origin APIs (orders, settings, upload, products, reviews, analytics)
-- [x] Public web APIs locked (no open order list/update, settings secrets, upload, product mutate, admin reviews)
-- [x] Admin middleware returns JSON 401 for API routes
-- [x] Login rate limiting (5 / 15 min)
-- [x] Remove demo credentials from login UI
-- [x] Update `.env.example`
-- [ ] Owner: set strong `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` on deploy
-- [ ] Owner: verify admin flows after deploy (login → settings save → order status → upload)
+- [x] Admin mutations on **admin app** same-origin APIs
+- [x] Public web APIs locked
+- [x] Admin middleware JSON 401 for API routes
+- [x] Login rate limiting; demo credentials removed from UI
 
-## Phase 10 — Data & Storage Foundation
+## Phase 10 — Data & Storage Foundation ✅
 
-- Postgres as primary path (not mem seed)
-- Object storage for uploads (R2/S3/Cloudflare Images)
-- Durable rate limiting (Redis or Upstash)
-- Settings/orders durable when DB live
+- [x] Postgres primary path: `useDb()` true whenever `DATABASE_URL` is set (no localhost exclusion)
+- [x] Catalog seed script: `pnpm db:seed` upserts categories + products into Postgres
+- [x] Settings durable via Prisma `Setting` model when DB live (async get/update)
+- [x] Orders/products/reviews already Prisma-backed when `useDb()` — mem seed is demo-only
+- [x] Object storage helper (`uploadImageBuffer`): S3/R2 when env set, else local `public/uploads`
+- [x] Admin upload route uses storage helper
+- [x] Durable rate limiting via Upstash Redis REST when configured; memory fallback
+- [x] `.env.example` documents DATABASE_URL, S3_*, UPSTASH_*
+- [ ] Owner: provision Postgres + set `DATABASE_URL`, run `pnpm db:push` + `pnpm db:seed`
+- [ ] Owner: (prod) configure R2/S3 + Upstash for multi-instance durability
 
 ## Phase 11 — Production Observability & Quality
 
@@ -44,7 +46,7 @@
 ## Phase 12 — Payments, Trust & Operations
 
 - Real JazzCash / EasyPaisa / custom gateway adapters + webhooks
-- Review ownership verification (email + orderId must match paid order)
+- Review ownership verification hardening
 - Order lifecycle / tracking UX improvements
 
 ## Phase 13 — UX Scale & Polish
@@ -59,7 +61,10 @@
 
 | Item | Status |
 |------|--------|
-| Real Postgres `DATABASE_URL` | 🔶 Owner sets on deploy |
-| Live JazzCash/EasyPaisa credentials | 🔶 When merchant ready |
+| Real Postgres `DATABASE_URL` | 🔶 **Required for Phase 10 durability** |
+| `pnpm db:push` + `pnpm db:seed` | 🔶 After DATABASE_URL |
+| S3/R2 object storage | 🔶 Recommended for prod uploads |
+| Upstash Redis rate limits | 🔶 Recommended multi-instance |
+| Live JazzCash/EasyPaisa credentials | 🔶 Phase 12 |
 | Vercel domain + GSC | 🔶 Owner deploy |
-| Strong secrets in production env | 🔶 **Required for Phase 9** |
+| Strong secrets in production env | 🔶 From Phase 9 |

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   if (wantsAdmin && !requireAdminApiSecret(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json(getPublicSettings());
+  return NextResponse.json(await getPublicSettings());
 }
 
 export async function PUT(request: NextRequest) {

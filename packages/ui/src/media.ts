@@ -1,8 +1,8 @@
 /**
  * Media pipeline helpers
  *
- * Dev / current: validate mime + max size, store original under public/uploads.
- * Production (Cloudflare Images or Sharp on worker):
+ * Validate mime + max size. Storage via `@eclat/config` uploadImageBuffer
+ * (S3/R2 when configured, else public/uploads). Production transforms:
  * 1. Accept upload (JPEG/PNG/WebP/GIF)
  * 2. validateImageFile
  * 3. Compress → WebP + AVIF variants

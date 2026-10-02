@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json(getAdminSettings());
+  return NextResponse.json(await getAdminSettings());
 }
 
 export async function PUT(req: NextRequest) {
@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest) {
   }
   try {
     const body = (await req.json()) as Partial<StoreSettings>;
-    const updated = updateSettings(body);
+    const updated = await updateSettings(body);
     return NextResponse.json(updated);
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "Failed to update settings";
