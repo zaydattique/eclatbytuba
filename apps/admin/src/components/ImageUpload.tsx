@@ -22,8 +22,7 @@ export function ImageUpload({ value = [], onChange }: ImageUploadProps) {
       const formData = new FormData();
       formData.append("file", file);
 
-      const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const res = await fetch(`${base}/api/upload`, {
+      const res = await fetch(`/api/upload`, {
         method: "POST",
         body: formData,
       });

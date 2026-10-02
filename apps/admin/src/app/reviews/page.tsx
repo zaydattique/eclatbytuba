@@ -24,8 +24,7 @@ export default function AdminReviewsPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const res = await fetch(`${base}/api/reviews?admin=true`);
+      const res = await fetch(`/api/reviews`);
       const data = await res.json();
       setReviews(data.reviews || []);
     } finally {
@@ -38,8 +37,7 @@ export default function AdminReviewsPage() {
   }, []);
 
   const moderate = async (id: string, isApproved: boolean) => {
-    const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    await fetch(`${base}/api/reviews`, {
+    await fetch(`/api/reviews`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, isApproved }),

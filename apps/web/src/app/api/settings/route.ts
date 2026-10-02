@@ -1,31 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getPublicSettings,
-  getAdminSettings,
-  updateSettings,
-  type StoreSettings,
-} from "@eclat/db";
+import { getPublicSettings } from "@eclat/db";
+import { requireAdminApiSecret } from "@eclat/auth";
 
-/**
- * GET ?admin=1 → full settings (admin)
- * GET → public (no secrets)
- * PUT → update settings
- */
+/** Public settings only. Full admin settings on admin app. */
 export async function GET(request: NextRequest) {
-  const admin = request.nextUrl.searchParams.get("admin") === "1";
-  if (admin) {
-    return NextResponse.json(getAdminSettings());
+  const wantsAdmin = request.nextUrl.searchParams.get("admin") === "1";
+  if (wantsAdmin && !requireAdminApiSecret(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   return NextResponse.json(getPublicSettings());
 }
 
 export async function PUT(request: NextRequest) {
-  try {
-    const body = (await request.json()) as Partial<StoreSettings>;
-    const updated = updateSettings(body);
-    return NextResponse.json(updated);
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : "Failed to update settings";
-    return NextResponse.json({ error: message }, { status: 400 });
+  if (!requireAdminApiSecret(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  return NextResponse.json(
+    { error: "Use admin app settings API" },
+    { status: 410 }
+  );
 }

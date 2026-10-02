@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOrders, createOrder } from "@eclat/db";
+import { createOrder } from "@eclat/db";
 import { rateLimit, RATE_LIMITS, clientKey } from "@eclat/config";
 import { sendOrderConfirmation } from "@eclat/emails";
 
-export async function GET() {
-  try {
-    const orders = await getOrders();
-    return NextResponse.json({ orders });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
-  }
-}
-
+/**
+ * Public checkout only.
+ * Admin order list/update live on admin app (session-protected).
+ */
 export async function POST(req: NextRequest) {
   try {
     const ip =
@@ -36,7 +31,6 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-
     if (!body.email || !body.items?.length) {
       return NextResponse.json(
         { error: "email and items are required" },
@@ -47,34 +41,26 @@ export async function POST(req: NextRequest) {
     const order = await createOrder({
       email: body.email,
       phone: body.phone,
-      shippingAddress: {
-        ...(body.shippingAddress || {}),
-        shippingMethod: body.shippingMethod || "standard",
-      },
+      shippingAddress: body.shippingAddress || {},
       items: body.items,
-      paymentMethod: body.paymentMethod || "cod",
-      shippingCost:
-        body.shippingCost != null
-          ? Number(body.shippingCost)
-          : body.shippingMethod === "express"
-            ? 350
-            : 250,
+      paymentMethod: body.paymentMethod,
+      shippingCost: body.shippingCost,
     });
 
     try {
       await sendOrderConfirmation({
         to: body.email,
-        orderNumber: (order as any).orderNumber,
-        total: Number((order as any).total),
+        orderNumber: (order as { orderNumber?: string }).orderNumber || "",
+        total: Number((order as { total?: number }).total || 0),
         paymentMethod: body.paymentMethod || "cod",
       });
-    } catch (emailErr) {
-      console.warn("Order email skipped:", emailErr);
+    } catch (mailErr) {
+      console.error("Order email failed:", mailErr);
     }
 
     return NextResponse.json({ order }, { status: 201 });
-  } catch (e: any) {
-    console.error(e);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Checkout failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

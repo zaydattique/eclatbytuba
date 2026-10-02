@@ -34,8 +34,7 @@ export function OrderStatusForm({
   const handleUpdate = async () => {
     setLoading(true);
     try {
-      const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const res = await fetch(`${base}/api/orders/${orderId}`, {
+      const res = await fetch(`/api/orders/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
