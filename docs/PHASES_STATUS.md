@@ -25,12 +25,23 @@
 - [ ] Owner: set strong `AUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` on deploy
 - [ ] Owner: verify admin flows after deploy (login → settings save → order status → upload)
 
+## Phase 0 baseline (repo audit) — 2026-10-08
+
+- [x] Production refuses silent in-memory catalog/orders (`useDb` hard-fail without remote `DATABASE_URL`)
+- [x] `packages/db/src/seed.ts` added (`pnpm db:seed` was broken — script pointed at missing file)
+- [x] `@eclat/auth` added to `apps/web` dependencies (web APIs already imported it)
+- [x] README / `.env.example` aligned with production requirements (no demo password as primary docs)
+- [ ] **CRITICAL:** ensure `packages/db/src/data.ts` on main is the full data layer (not a placeholder)
+- [ ] pnpm-lock.yaml still missing in repo — run `pnpm install` and commit lockfile
+- [ ] Settings + analytics stores remain process-memory (deferred to Phase 10)
+
 ## Phase 10 — Data & Storage Foundation
 
-- Postgres as primary path (not mem seed)
+- Postgres as primary path for all environments that matter (dev may still use mem with `ALLOW_IN_MEMORY=1`)
 - Object storage for uploads (R2/S3/Cloudflare Images)
 - Durable rate limiting (Redis or Upstash)
-- Settings/orders durable when DB live
+- Settings/orders/analytics durable when DB live
+- Wire Prisma `Setting` model for admin settings persistence
 
 ## Phase 11 — Production Observability & Quality
 
@@ -59,7 +70,7 @@
 
 | Item | Status |
 |------|--------|
-| Real Postgres `DATABASE_URL` | 🔶 Owner sets on deploy |
-| Live JazzCash/EasyPaisa credentials | 🔶 When merchant ready |
-| Vercel domain + GSC | 🔶 Owner deploy |
-| Strong secrets in production env | 🔶 **Required for Phase 9** |
+| Real Postgres `DATABASE_URL` | 🟠 Owner sets on deploy |
+| Live JazzCash/EasyPaisa credentials | 🟠 When merchant ready |
+| Vercel domain + GSC | 🟠 Owner deploy |
+| Strong secrets in production env | 🟠 **Required for Phase 9** |
