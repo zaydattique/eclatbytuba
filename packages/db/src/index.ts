@@ -48,3 +48,14 @@ export {
   updateSettings,
 } from "./settings-store";
 export type { StoreSettings, PaymentMethodId } from "./settings-store";
+
+export {
+  CheckoutError,
+  validateEmail,
+  normalizeCheckoutItems,
+  computeOrderTotals,
+  computeLineTotal,
+  generateOrderNumber,
+  assertFinancialInvariants,
+  normalizeIdempotencyKey,
+} from "./checkout";
